@@ -1,0 +1,19 @@
+@import "tailwindcss/theme";
+@import "tailwindcss/utilities";
+
+:root {
+  --ion-color-light: #f8f8f8;
+}
+
+body,
+html {
+  overscroll-behavior-y: none;
+  overflow: hidden;
+}
+
+ion-tab-bar.tab-bar-translucent,
+ion-header.header-translucent-md ion-toolbar {
+  --opacity: 0.8;
+  --background: #f8f8f8;
+  backdrop-filter: saturate(210%) blur(20px);
+}
