@@ -55,6 +55,8 @@ export default defineConfig((config) => {
   return {
     plugins,
     build: {
+      outDir: "harmony/entry/src/main/resources/rawfile/public",
+      emptyOutDir: true,
       assetsInlineLimit: 0, // 设置为0禁用将较小资源转 base64 编码
       rollupOptions: {
         output: {
@@ -75,7 +77,7 @@ export default defineConfig((config) => {
     },
     server: {
       host: "::",
-      port: 8080,
+      // port: 8080,
     },
   };
 });
