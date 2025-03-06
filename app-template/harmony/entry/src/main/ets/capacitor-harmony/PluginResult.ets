@@ -1,12 +1,26 @@
-export default class PluginResult {
-  private json = new Object();
+import JSObject from "./JSObject";
 
-  public put(name: string, value: boolean | number | Date | string | object) {
-    this.json[name] = value;
+export default class PluginResult {
+  private json: JSObject;
+
+  constructor(json?: JSObject) {
+    this.json = json ?? new JSObject();
+  }
+
+  public put(name: string, value: boolean | number | Date | Object | PluginResult | null) {
+    try {
+      if (value instanceof PluginResult) {
+        this.json.put(name, value.json);
+      } else {
+        this.json.put(name, value);
+      }
+    } catch (e) {
+      console.error("Plugin", e);
+    }
   }
 
   public toString(): string {
-
+    return this.json.toString();
   }
 
   /**
@@ -15,6 +29,12 @@ export default class PluginResult {
    * @return插件中的原始数据响应。
    */
   public getWrappedResult(): JSObject {
-
+    let ret = new JSObject();
+    ret.put("pluginId", this.json.getString("pluginId"));
+    ret.put("methodName", this.json.getString("methodName"));
+    ret.put("success", this.json.getBoolean("success", false));
+    ret.put("data", this.json.getJSObject("data"));
+    ret.put("error", this.json.getJSObject("error"));
+    return ret;
   }
 }

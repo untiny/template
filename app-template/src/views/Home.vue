@@ -26,7 +26,7 @@
             "
           >
             <div slot="end">
-              <ion-button size="small">OK</ion-button>
+              <ion-button size="small" @click="test">OK</ion-button>
             </div>
           </ion-input>
         </div>
@@ -53,8 +53,8 @@
         </ion-button>
         <div class="bg-white rounded-2xl py-4 col-span-4">
           <ion-item lines="none" mode="ios">
-            <ion-label>Label</ion-label>
-            <ion-note slot="end">Value</ion-note>
+            <ion-label>platform</ion-label>
+            <ion-note slot="end">{{ platform }}</ion-note>
           </ion-item>
           <ion-item lines="none" mode="ios">
             <ion-label>Label</ion-label>
@@ -74,8 +74,20 @@
 import { useQRCode } from "@vueuse/integrations/useQRCode";
 import vueIcon from "@/assets/vue.svg";
 import viteIcon from "@/assets/vite.svg";
+import { Capacitor } from "@capacitor/core";
 
 const ip = ref("");
 const text = ref("text-to-encode");
 const qrcode = useQRCode(text, { margin: 0 });
+
+const platform = Capacitor.getPlatform();
+
+const test = () => {
+  console.log(ip.value);
+  // @ts-ignore
+  window.harmonyBridge.postMessage({
+    action: "test",
+    data: ip.value,
+  });
+};
 </script>
