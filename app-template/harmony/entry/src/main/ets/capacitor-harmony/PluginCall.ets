@@ -100,6 +100,10 @@ export default class PluginCall {
     return this.data.getArray(name, defaultValue)
   }
 
+  public setKeepAlive(keepAlive: boolean) {
+    this.keepAlive = keepAlive;
+  }
+
 
   public release(bridge: Bridge) {
     this.keepAlive = false;

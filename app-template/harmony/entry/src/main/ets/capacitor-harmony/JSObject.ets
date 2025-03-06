@@ -130,4 +130,8 @@ export default class JSObject {
   public toString() {
     return JSON.stringify(this.json);
   }
+
+  public toObject() {
+    return this.json ?? {};
+  }
 }

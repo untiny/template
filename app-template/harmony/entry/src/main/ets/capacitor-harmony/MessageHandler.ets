@@ -3,16 +3,19 @@ import { webview } from "@kit.ArkWeb"
 import PluginCall from "./PluginCall";
 import PluginResult from "./PluginResult";
 import JSObject from "./JSObject";
+import PluginManager from "./PluginManager";
 
 
 export default class MessageHandler {
   private bridge: Bridge;
   private webview: webview.WebviewController;
-  private callback?: (event: Object) => void;
+  private callback?: (event: Record<string, Object>) => void;
+  private cordovaPluginManager: PluginManager;
 
-  constructor(bridge: Bridge, webview: webview.WebviewController) {
+  constructor(bridge: Bridge, webview: webview.WebviewController, cordovaPluginManager: PluginManager) {
     this.bridge = bridge;
     this.webview = webview;
+    this.cordovaPluginManager = cordovaPluginManager;
     this.webview.registerJavaScriptProxy(
       this,
       "harmonyBridge",
@@ -120,13 +123,13 @@ export default class MessageHandler {
     }
   }
 
-  private legacySendResponseMessage(data: Object) {
+  private legacySendResponseMessage(data: Record<string, Object>) {
     let runScript = "window.Capacitor.fromNative(" + JSON.stringify(data) + ")";
     this.webview.runJavaScript(runScript);
   }
 
   /** web侧设置回调 */
-  public onmessage(callback: (event: Object) => void): void {
+  public onmessage(callback: (event: Record<string, Object>) => void): void {
     console.info("Web set message callback");
     this.callback = callback;
   }
