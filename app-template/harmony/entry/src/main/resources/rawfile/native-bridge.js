@@ -162,9 +162,7 @@ var nativeBridge = (function (exports) {
       var _a, _b;
       if (win === null || win === void 0 ? void 0 : win.androidBridge) {
         return "android";
-      } else if (win === null || win === void 0 ? void 0 : win.harmonyBridge) {
-        console.log("getPlatformId: harmony");
-        
+      } else if (win === null || win === void 0 ? void 0 : win.harmonyBridge) {        
         return "harmony";
       } else if (
         (_b =
@@ -953,6 +951,8 @@ var nativeBridge = (function (exports) {
     };
     function initNativeBridge(win) {
       const cap = win.Capacitor || {};
+      console.log("Capacitor initNativeBridge", JSON.stringify(cap));
+      
       // keep a collection of callbacks for native response data
       const callbacks = new Map();
       const webviewServerUrl =
@@ -1186,6 +1186,8 @@ var nativeBridge = (function (exports) {
       initLegacyHandlers(win, cap);
       initVendor(win, cap);
       win.Capacitor = cap;
+      console.log("Capacitor initNativeBridge done", JSON.stringify( win.Capacitor));
+      
     }
 
     // w.addEventListener('message', function (event) {

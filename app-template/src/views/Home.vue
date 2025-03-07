@@ -74,20 +74,17 @@
 import { useQRCode } from "@vueuse/integrations/useQRCode";
 import vueIcon from "@/assets/vue.svg";
 import viteIcon from "@/assets/vite.svg";
-import { Capacitor } from "@capacitor/core";
+import { Capacitor, CapacitorHttp } from "@capacitor/core";
 
-const ip = ref("");
+const ip = ref("123");
 const text = ref("text-to-encode");
 const qrcode = useQRCode(text, { margin: 0 });
 
 const platform = Capacitor.getPlatform();
 
-const test = () => {
-  console.log(ip.value);
-  // @ts-ignore
-  window.harmonyBridge.postMessage({
-    action: "test",
-    data: ip.value,
+const test = async () => {
+  await CapacitorHttp.get({
+    url: "http://192.168.10.170:5173/",
   });
 };
 </script>

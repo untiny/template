@@ -19,13 +19,15 @@ import "./style.css";
 
 async function injectSafeAreaVariables() {
   if (!Capacitor.isNativePlatform()) return;
-  const safeArea = await SafeArea.getSafeArea();
-  Object.entries(safeArea).forEach(([key, value]) => {
-    document.documentElement.style.setProperty(
-      `--ion-safe-area-${key}`,
-      `${value}px`
-    );
-  });
+  // try {
+  //   const safeArea = await SafeArea.getSafeArea()
+  //   Object.entries(safeArea).forEach(([key, value]) => {
+  //     document.documentElement.style.setProperty(
+  //       `--ion-safe-area-${key}`,
+  //       `${value}px`
+  //     );
+  //   });
+  // } catch (error) {}
 }
 
 async function bootstrap() {

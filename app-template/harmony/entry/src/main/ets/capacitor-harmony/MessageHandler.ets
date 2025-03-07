@@ -8,19 +8,21 @@ import PluginManager from "./PluginManager";
 
 export default class MessageHandler {
   private bridge: Bridge;
-  private webview: webview.WebviewController;
-  private callback?: (event: Record<string, Object>) => void;
-  private cordovaPluginManager: PluginManager;
+  private webviewController: webview.WebviewController;
+  private callback?: (event: Record<string, Object | null>) => void;
 
-  constructor(bridge: Bridge, webview: webview.WebviewController, cordovaPluginManager: PluginManager) {
+  constructor(bridge: Bridge, webviewController: webview.WebviewController) {
     this.bridge = bridge;
-    this.webview = webview;
-    this.cordovaPluginManager = cordovaPluginManager;
-    this.webview.registerJavaScriptProxy(
-      this,
-      "harmonyBridge",
-      ["postMessage", "onmessage"]
-    );
+    this.webviewController = webviewController;
+  }
+
+  public getJavaScriptProxy(): JavaScriptProxy {
+    return {
+      object: this,
+      name: "harmonyBridge",
+      methodList: ["postMessage", "onmessage"],
+      controller: this.webviewController
+    }
   }
 
   /** web侧发送消息到鸿蒙 */
@@ -102,19 +104,15 @@ export default class MessageHandler {
       }
 
       let isValidCallbackId = call.getCallbackId() !== PluginCall.CALLBACK_ID_DANGLING;
-      // if (isValidCallbackId) {
-      //   if (this.bridge.getConfig().isUsingLegacyBridge()) {
-      //   } else if (
-      //     WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER) &&
-      //       this.callback != null
-      //   ) {
-      //     this.callback(data);
-      //   } else {
-      //     this.legacySendResponseMessage(data);
-      //   }
-      // } else {
-      //   this.bridge.getApp().fireRestoredResult(data);
-      // }
+      if (isValidCallbackId) {
+        if (this.callback != null) {
+          this.callback(data.toObject());
+        } else {
+          this.legacySendResponseMessage(data.toObject());
+        }
+      } else {
+        this.bridge.getApp().fireRestoredResult(data);
+      }
     } catch (error) {
       console.error("sendResponseMessage: error: " + error);
     }
@@ -123,13 +121,13 @@ export default class MessageHandler {
     }
   }
 
-  private legacySendResponseMessage(data: Record<string, Object>) {
+  private legacySendResponseMessage(data: Record<string, Object | null>) {
     let runScript = "window.Capacitor.fromNative(" + JSON.stringify(data) + ")";
-    this.webview.runJavaScript(runScript);
+    this.webviewController.runJavaScript(runScript);
   }
 
   /** web侧设置回调 */
-  public onmessage(callback: (event: Record<string, Object>) => void): void {
+  public onmessage(callback: (event: Record<string, Object | null>) => void): void {
     console.info("Web set message callback");
     this.callback = callback;
   }

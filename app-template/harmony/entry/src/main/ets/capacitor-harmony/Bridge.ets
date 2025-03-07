@@ -75,7 +75,7 @@ export default class Bridge {
     this.config = config ?? CapConfig.loadDefault(context);
     this.initWebView();
     this.setAllowedOriginRules();
-    this.msgHandler = new MessageHandler(this, webView, pluginManager);
+    this.msgHandler = new MessageHandler(this, webView);
     this.registerAllPlugins();
     this.loadWebView();
   }

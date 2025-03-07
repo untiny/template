@@ -21,7 +21,7 @@ export default class App {
     this.appRestoredListener = listener;
   }
 
-  protected fireRestoredResult(result: PluginResult): void {
+  public fireRestoredResult(result: PluginResult): void {
     this.appRestoredListener?.(result);
   }
 

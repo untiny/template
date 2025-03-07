@@ -15,6 +15,9 @@ export default class BridgeAbility extends UIAbility {
   protected initialPlugins = new Array<Object>();
   protected bridgeBuilder: BridgeBuilder = new BridgeBuilder(this);
 
+  public getBridge() {
+  }
+
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');

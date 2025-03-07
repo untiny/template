@@ -104,7 +104,6 @@ export default class PluginCall {
     this.keepAlive = keepAlive;
   }
 
-
   public release(bridge: Bridge) {
     this.keepAlive = false;
     bridge.releaseCall(this);

@@ -65,6 +65,7 @@ export default defineConfig((config) => {
             vueuse: ["@vueuse/core"],
             ionic: ["@ionic/vue", "@ionic/vue-router"],
             lodash: ["lodash"],
+            capacitor: ["@capacitor/core"],
           },
         },
       },
