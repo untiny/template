@@ -2,7 +2,11 @@ import { buffer } from "@kit.ArkTS";
 
 export default class JSExport {
   private static CATCHALL_OPTIONS_PARAM = "_options";
-  private staticCALLBACK_PARAM = "_callback";
+  private static CALLBACK_PARAM = "_callback";
+
+  public static getPlatformJS() {
+    return "window.CapacitorCustomPlatform = { name: \"harmony\" };"
+  }
 
   public static getGlobalJS(context: Context, loggingEnabled: boolean, isDebug: boolean): string {
     return "window.Capacitor = { DEBUG: " + isDebug + ", isLoggingEnabled: " + loggingEnabled + ", Plugins: {} };";

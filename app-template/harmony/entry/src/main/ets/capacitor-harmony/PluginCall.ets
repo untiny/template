@@ -3,6 +3,7 @@ import JSObject from "./JSObject";
 import MessageHandler from "./MessageHandler";
 import PluginErrorResult from "./PluginErrorResult";
 import PluginResult from "./PluginResult";
+import { Any } from "./Type";
 
 export default class PluginCall {
   public static CALLBACK_ID_DANGLING: string = "-1";
@@ -10,10 +11,11 @@ export default class PluginCall {
   private pluginId: string;
   private callbackId: string;
   private methodName: string;
-  private data: JSObject
+  private data: Record<string, Any>
   private keepAlive: boolean = false;
 
-  constructor(msgHandler: MessageHandler, pluginId: string, callbackId: string, methodName: string, data: JSObject) {
+  constructor(msgHandler: MessageHandler, pluginId: string, callbackId: string, methodName: string,
+    data: Record<string, Any>) {
     this.msgHandler = msgHandler;
     this.pluginId = pluginId;
     this.callbackId = callbackId;
@@ -33,7 +35,7 @@ export default class PluginCall {
 
   public resolve(): void
 
-  public resolve(data: Object | null = null) {
+  public resolve(data: Any = null) {
     this.msgHandler.sendResponseMessage(this, data, null);
   }
 
@@ -43,7 +45,7 @@ export default class PluginCall {
     this.msgHandler.sendResponseMessage(this, null, errorResult);
   }
 
-  public reject(message: string, code: string | null, error: Error | null = null, data: Object | null = null): void {
+  public reject(message: string, code: string | null, error: Error | null = null, data: Any = null): void {
     let errorResult = new PluginErrorResult();
     if (error !== null) {
       console.error("Plugin", message, error);
@@ -81,23 +83,23 @@ export default class PluginCall {
   }
 
   public getString(name: string, defaultValue: string | null = null): string | null {
-    return this.data.getString(name, defaultValue)
+    return Reflect.get(this.data, name) as string ?? defaultValue;
   }
 
   public getNumber(name: string, defaultValue: number | null = null): number | null {
-    return this.data.getNumber(name, defaultValue)
+    return Reflect.get(this.data, name) as number ?? defaultValue;
   }
 
   public getBoolean(name: string, defaultValue: boolean = false): boolean {
-    return this.data.getBoolean(name, defaultValue)
+    return Reflect.get(this.data, name) as boolean ?? defaultValue;
   }
 
-  public getObject(name: string, defaultValue: JSObject | null = null): JSObject | null {
-    return this.data.getJSObject(name, defaultValue)
+  public getObject(name: string, defaultValue: Record<string, Any> | null = null): Record<string, Any> | null {
+    return Reflect.get(this.data, name) as Record<string, Any> ?? defaultValue;
   }
 
   public getArray(name: string, defaultValue: Array<Object> = []): Array<Object> {
-    return this.data.getArray(name, defaultValue)
+    return Reflect.get(this.data, name) as Array<Object> ?? defaultValue;
   }
 
   public setKeepAlive(keepAlive: boolean) {

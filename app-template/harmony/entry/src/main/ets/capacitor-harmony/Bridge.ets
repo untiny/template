@@ -84,6 +84,10 @@ export default class Bridge {
     return this.app;
   }
 
+  public getContext() {
+    return this.context;
+  }
+
   private loadWebView() {
 
   }
@@ -98,6 +102,7 @@ export default class Bridge {
   }
 
   private getJSInjector(): JSInjector {
+    let platformJS = JSExport.getPlatformJS();
     let globalJS = JSExport.getGlobalJS(this.context, true, true); // 还需做成读取CapConfig
     let bridgeJS = JSExport.getBridgeJS(this.context);
     let pluginJS = JSExport.getPluginJS(); // plugins.values()
@@ -106,7 +111,16 @@ export default class Bridge {
     let cordovaPluginsFileJS = JSExport.getCordovaPluginsFileJS(this.context);
     let localUrlJS = "window.WEBVIEW_SERVER_URL = '" + this.localUrl + "';";
 
-    return new JSInjector(globalJS, bridgeJS, pluginJS, cordovaJS, cordovaPluginsJS, cordovaPluginsFileJS, localUrlJS);
+    return new JSInjector(
+      platformJS,
+      globalJS,
+      bridgeJS,
+      pluginJS,
+      cordovaJS,
+      cordovaPluginsJS,
+      cordovaPluginsFileJS,
+      localUrlJS
+    );
   }
 
   public saveCall(call: PluginCall) {

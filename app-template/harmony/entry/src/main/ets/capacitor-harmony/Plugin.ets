@@ -3,6 +3,8 @@ import PluginCall from "./PluginCall";
 import PluginHandle from "./PluginHandle";
 import { HashMap, List } from "@kit.ArkTS";
 import JSObject from "./JSObject";
+import { PluginMethod, PluginMethodReturnType } from "./decorators/PluginMethod";
+import { PermissionCallback } from "./decorators/PermissionCallback";
 
 export default class Plugin {
   // 我们将在持久化 Bundle 中使用的 JSON blob 的密钥。
@@ -27,8 +29,24 @@ export default class Plugin {
     this.handle = handle;
   }
 
+  public getPluginHandle() {
+    return this.handle;
+  }
+
   public setBridge(bridge: Bridge) {
     this.bridge = bridge;
+  }
+
+  public getBridge() {
+    return this.bridge;
+  }
+
+  public getContext(): Context {
+    return this.bridge?.getContext() as Context;
+  }
+
+  public getAppId() {
+    return this.getContext().applicationInfo.name;
   }
 
   /**
@@ -102,12 +120,18 @@ export default class Plugin {
     })
   }
 
+  @PluginMethod({
+    returnType: PluginMethodReturnType.NONE
+  })
   public addListener(call: PluginCall): void {
     let eventName = call.getString("eventName") as string;
     call.setKeepAlive(true);
     this.addEventListener(eventName, call);
   }
 
+  @PluginMethod({
+    returnType: PluginMethodReturnType.NONE
+  })
   public removeListener(call: PluginCall): void {
     let eventName = call.getString("eventName") as string;
     let callbackId = call.getString("callbackId") as string;
@@ -118,14 +142,20 @@ export default class Plugin {
     }
   }
 
+  @PluginMethod({
+    returnType: PluginMethodReturnType.NONE
+  })
   public removeAllListeners(call: PluginCall): void {
     this.eventListeners.clear();
     call.resolve();
   }
 
+  @PluginMethod()
+  @PermissionCallback()
   public checkPermissions(call: PluginCall): void {
   }
 
+  @PluginMethod()
   public requestPermissions(call: PluginCall): void {
   }
 }

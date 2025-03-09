@@ -1,4 +1,21 @@
 import JSObject from "./JSObject";
+import { Any } from "./Type";
+
+// export type PluginResultData = Record<string, Object | null>
+//
+// export interface PluginResultError {
+//   message: string
+// }
+//
+// export interface PluginResult {
+//   callbackId?: string;
+//   methodName?: string;
+//   data: PluginResultData;
+//   success: boolean;
+//   error?: PluginResultError;
+//   pluginId?: string;
+//   save?: boolean;
+// }
 
 export default class PluginResult {
   private json: JSObject;
@@ -23,7 +40,7 @@ export default class PluginResult {
     return this.json.toString();
   }
 
-  public toObject(): Record<string, Object | null> {
+  public toObject(): Record<string, Any> {
     return this.json.toObject();
   }
 

@@ -1,0 +1,17 @@
+{
+	"appId": "com.example.app",
+	"appName": "app-template",
+	"webDir": "dist",
+	"plugins": {
+		"CapacitorHttp": {
+			"enabled": true
+		},
+		"Keyboard": {
+			"resizeOnFullScreen": false,
+			"resize": "none"
+		}
+	},
+	"server": {
+		"androidScheme": "http"
+	}
+}

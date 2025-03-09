@@ -3,7 +3,29 @@ import { webview } from "@kit.ArkWeb"
 import PluginCall from "./PluginCall";
 import PluginResult from "./PluginResult";
 import JSObject from "./JSObject";
-import PluginManager from "./PluginManager";
+
+export interface MessageCallData {
+  type?: 'message';
+  callbackId: string;
+  pluginId: string;
+  methodName: string;
+  options: Record<string, Object | null>;
+}
+
+interface GeneratedTypeLiteralInterface_1 {
+  message: string;
+  url: string;
+  line: number;
+  col: number;
+  errorObject: string;
+}
+
+export interface ErrorCallData {
+  type: 'js.error';
+  error: GeneratedTypeLiteralInterface_1;
+}
+
+export type CallData = MessageCallData | ErrorCallData;
 
 
 export default class MessageHandler {
@@ -26,41 +48,18 @@ export default class MessageHandler {
   }
 
   /** web侧发送消息到鸿蒙 */
-  public postMessage(json: Record<string, Object>): void {
+  public postMessage(postData: CallData): void {
     try {
-      let postData = JSObject.fromJSONObject(json);
-      let type = postData.getString("type");
-
-      let typeIsNotNull = type !== null;
-      let isCordovaPlugin = typeIsNotNull && type === "cordova";
-      let isJavaScriptError = typeIsNotNull && type === "js.error";
-
-      let callbackId = postData.getString("callbackId") as string;
-
-      if (isCordovaPlugin) {
-        let service = postData.getString("service") as string;
-        let action = postData.getString("action") as string;
-        let actionArgs = postData.getString("actionArgs") as string;
-
-        console.log(
-          "Plugin",
-          "To native (Cordova plugin): callbackId: " +
-            callbackId +
-            ", service: " +
-            service +
-            ", action: " +
-            action +
-            ", actionArgs: " +
-            actionArgs
-        );
-
-        this.callCordovaPluginMethod(callbackId, service, action, actionArgs);
-      } else if (isJavaScriptError) {
+      let typeIsNotNull = postData.type !== null;
+      let isJavaScriptError = typeIsNotNull && postData.type === "js.error";
+      if (isJavaScriptError) {
         console.error("JavaScript Error: " + JSON.stringify(postData))
       } else {
-        let pluginId = postData.getString("pluginId") as string;
-        let methodName = postData.getString("methodName") as string;
-        let methodData = postData.getJSObject("options", new JSObject());
+        let call = postData as MessageCallData;
+        let callbackId = call.callbackId;
+        let pluginId = call.pluginId;
+        let methodName = call.methodName;
+        let methodData = call.options;
 
         console.info(
           "Plugin",
@@ -72,7 +71,7 @@ export default class MessageHandler {
             methodName
         );
 
-        this.callPluginMethod(callbackId, pluginId, methodName, methodData as JSObject);
+        this.callPluginMethod(callbackId, pluginId, methodName, methodData);
       }
     } catch (error) {
       console.error("Post message error:", error);
@@ -132,7 +131,7 @@ export default class MessageHandler {
     this.callback = callback;
   }
 
-  private callPluginMethod(callbackId: string, pluginId: string, methodName: string, methodData: JSObject): void {
+  private callPluginMethod(callbackId: string, pluginId: string, methodName: string, methodData:  Record<string, Object | null>): void {
     let call = new PluginCall(this, pluginId, callbackId, methodName, methodData)
     this.bridge.callPluginMethod(pluginId, methodName, call);
   }

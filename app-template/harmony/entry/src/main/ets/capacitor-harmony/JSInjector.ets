@@ -1,4 +1,5 @@
 export default class JSInjector {
+  private platformJS: string;
   private globalJS: string;
   private bridgeJS: string;
   private pluginJS: string;
@@ -8,6 +9,7 @@ export default class JSInjector {
   private localUrlJS: string;
 
   constructor(
+    platformJS: string,
     globalJS: string,
     bridgeJS: string,
     pluginJS: string,
@@ -16,6 +18,7 @@ export default class JSInjector {
     cordovaPluginsFileJS: string,
     localUrlJS: string,
   ) {
+    this.platformJS = platformJS;
     this.globalJS = globalJS;
     this.bridgeJS = bridgeJS;
     this.pluginJS = pluginJS;
@@ -27,6 +30,8 @@ export default class JSInjector {
 
   public getScriptString(): string {
     return (
+      this.platformJS +
+        "\n\n" +
       this.globalJS +
         "\n\n" +
       this.localUrlJS +
@@ -46,5 +51,42 @@ export default class JSInjector {
   public getInjectedHtml(html: string) {
     let js = "<script type=\"text/javascript\">" + this.getScriptString() + "</script>";
     return html.replace("<head>", "<head>" + js);
+  }
+
+  public getScripts(): Array<ScriptItem> {
+    return [
+      {
+        script: this.platformJS,
+        scriptRules: ['*']
+      },
+      {
+        script: this.globalJS,
+        scriptRules: ['*']
+      },
+      {
+        script: this.localUrlJS,
+        scriptRules: ['*']
+      },
+      {
+        script: this.bridgeJS,
+        scriptRules: ['*']
+      },
+      {
+        script: this.pluginJS,
+        scriptRules: ['*']
+      },
+      {
+        script: this.cordovaJS,
+        scriptRules: ['*']
+      },
+      {
+        script: this.cordovaPluginsFileJS,
+        scriptRules: ['*']
+      },
+      {
+        script: this.cordovaPluginsJS,
+        scriptRules: ['*']
+      },
+    ]
   }
 }

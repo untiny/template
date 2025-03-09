@@ -1,7 +1,11 @@
-import { webview } from '@kit.ArkWeb'
+import { webview } from '@kit.ArkWeb';
 import { buffer } from '@kit.ArkTS';
-import MessageHandler from './MessageHandler';
-import { BusinessError } from '@kit.BasicServicesKit';
+import Plugin from './Plugin';
+import CapacitorHttp from './plugin/CapacitorHttp';
+import { TypeConstructor } from '@ohos.arkui.StateManagement';
+import "reflect-metadata";
+import { PluginMetadata, CAPACITOR_PLUGIN } from './decorators/CapacitorPlugin';
+import { CAPACITOR_PLUGIN_METHOD } from './decorators/PluginMethod';
 
 class HarmonyBridge {
   private callback?: (event: Object) => void
@@ -46,9 +50,34 @@ export struct CapacitorWebView {
     return mimeType;
   }
 
+  registerPlugin(pluginClass: TypeConstructor<Plugin>) {
+    let pluginMetadata: PluginMetadata = Reflect.getMetadata(CAPACITOR_PLUGIN, pluginClass);
+    console.log("registerPlugin", pluginClass.name, JSON.stringify(pluginMetadata))
+    let pluginId: string = this.pluginId(pluginClass);
+    let prototype: Record<string, Object> = pluginClass.prototype;
+    const properties = Reflect.ownKeys(pluginClass.prototype);
+    const methods = properties.filter((name) => {
+      let fn: Function = Reflect.get(prototype, name)
+      let methodMetadata: Object = Reflect.getMetadata(CAPACITOR_PLUGIN_METHOD, fn)
+      console.log(fn.name, JSON.stringify(methodMetadata))
+      return typeof fn === "function" && name !== "constructor" && methodMetadata;
+    });
+
+    console.log(JSON.stringify(methods)); // 输出: ["method1", "method2"]
+  }
+
+  pluginId(pluginClass: TypeConstructor<Plugin>): string {
+    let pluginMetadata: PluginMetadata = Reflect.getMetadata(CAPACITOR_PLUGIN, pluginClass);
+    return pluginMetadata.name ?? pluginClass.name;
+  }
+
+  aboutToAppear(): void {
+    this.registerPlugin(CapacitorHttp)
+  }
+
   build() {
     Column() {
-      Web({ src: "http://192.168.10.170:5173/", controller: this.controller })
+      Web({ src: "http://192.168.31.98:5173/", controller: this.controller })
         .javaScriptProxy({
           object: this.harmonyBridge,
           name: 'harmonyBridge',
