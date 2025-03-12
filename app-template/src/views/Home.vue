@@ -83,8 +83,9 @@ const qrcode = useQRCode(text, { margin: 0 });
 const platform = Capacitor.getPlatform();
 
 const test = async () => {
-  await CapacitorHttp.get({
+  const res = await CapacitorHttp.get({
     url: "http://192.168.10.170:5173/",
   });
+  console.log("什么滴家伙", JSON.stringify(res));
 };
 </script>
