@@ -1,8 +1,8 @@
-import Bridge from "./Bridge"
-import { webview } from "@kit.ArkWeb"
-import PluginCall from "./PluginCall";
-import PluginResult from "./PluginResult";
-import JSObject from "./JSObject";
+import Bridge from './Bridge';
+import { webview } from '@kit.ArkWeb';
+import PluginCall from './PluginCall';
+import PluginResult from './PluginResult';
+import Logger from './Logger';
 
 export interface MessageCallData {
   type?: 'message';
@@ -53,7 +53,7 @@ export default class MessageHandler {
       let typeIsNotNull = postData.type !== null;
       let isJavaScriptError = typeIsNotNull && postData.type === "js.error";
       if (isJavaScriptError) {
-        console.error("JavaScript Error: " + JSON.stringify(postData))
+        Logger.error("JavaScript Error: " + JSON.stringify(postData))
       } else {
         let call = postData as MessageCallData;
         let callbackId = call.callbackId;
@@ -61,7 +61,7 @@ export default class MessageHandler {
         let methodName = call.methodName;
         let methodData = call.options;
 
-        console.info(
+        Logger.info(
           "Plugin",
           "To native (Capacitor plugin): callbackId: " +
             callbackId +
@@ -74,7 +74,7 @@ export default class MessageHandler {
         this.callPluginMethod(callbackId, pluginId, methodName, methodData);
       }
     } catch (error) {
-      console.error("Post message error:", error);
+      Logger.error("Post message error:", error);
     }
   }
 
@@ -94,7 +94,7 @@ export default class MessageHandler {
       if (pluginResultInError) {
         data.put("success", false);
         data.put("error", errorResult);
-        console.debug("Sending plugin error: " + JSON.stringify(data));
+        Logger.debug("Sending plugin error: " + JSON.stringify(data));
       } else {
         data.put("success", true);
         if (successResult !== null) {
@@ -113,7 +113,7 @@ export default class MessageHandler {
         this.bridge.getApp().fireRestoredResult(data);
       }
     } catch (error) {
-      console.error("sendResponseMessage: error: " + error);
+      Logger.error("sendResponseMessage: error: " + error);
     }
     if (!call.isKeptAlive()) {
       call.release(this.bridge);
@@ -127,11 +127,12 @@ export default class MessageHandler {
 
   /** web侧设置回调 */
   public onmessage(callback: (event: Record<string, Object | null>) => void): void {
-    console.info("Web set message callback");
+    Logger.info("Web set message callback");
     this.callback = callback;
   }
 
-  private callPluginMethod(callbackId: string, pluginId: string, methodName: string, methodData:  Record<string, Object | null>): void {
+  private callPluginMethod(callbackId: string, pluginId: string, methodName: string,
+    methodData: Record<string, Object | null>): void {
     let call = new PluginCall(this, pluginId, callbackId, methodName, methodData)
     this.bridge.callPluginMethod(pluginId, methodName, call);
   }

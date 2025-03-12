@@ -1,10 +1,11 @@
-import Bridge from "./Bridge";
-import PluginCall from "./PluginCall";
-import PluginHandle from "./PluginHandle";
-import { HashMap, List } from "@kit.ArkTS";
-import JSObject from "./JSObject";
-import { PluginMethod, PluginMethodReturnType } from "./decorators/PluginMethod";
-import { PermissionCallback } from "./decorators/PermissionCallback";
+import Bridge from './Bridge';
+import PluginCall from './PluginCall';
+import PluginHandle from './PluginHandle';
+import { HashMap, List } from '@kit.ArkTS';
+import JSObject from './JSObject';
+import { PluginMethod, PluginMethodReturnType } from './decorators/PluginMethod';
+import { PermissionCallback } from './decorators/PermissionCallback';
+import { AbilityConstant, Want } from '@kit.AbilityKit';
 
 export default class Plugin {
   // 我们将在持久化 Bundle 中使用的 JSON blob 的密钥。
@@ -157,5 +158,48 @@ export default class Plugin {
 
   @PluginMethod()
   public requestPermissions(call: PluginCall): void {
+  }
+
+
+  /**
+   * Handle onNewWant
+   */
+  public handleOnNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {
+  }
+
+  /**
+   * Handle onStart
+   */
+  public handleOnStart(): void {
+  }
+
+  /**
+   * Handle onRestart
+   */
+  public handleOnRestart(): void {
+  }
+
+  /**
+   * Handle onResume
+   */
+  public handleOnResume(): void {
+  }
+
+  /**
+   * Handle onPause
+   */
+  public handleOnPause(): void {
+  }
+
+  /**
+   * Handle onStop
+   */
+  public handleOnStop(): void {
+  }
+
+  /**
+   * Handle onDestroy
+   */
+  public handleOnDestroy(): void {
   }
 }

@@ -1,3 +1,5 @@
+import Logger from "./Logger";
+
 export default class JSInjector {
   private platformJS: string;
   private globalJS: string;
@@ -54,39 +56,10 @@ export default class JSInjector {
   }
 
   public getScripts(): Array<ScriptItem> {
-    return [
-      {
-        script: this.platformJS,
-        scriptRules: ['*']
-      },
-      {
-        script: this.globalJS,
-        scriptRules: ['*']
-      },
-      {
-        script: this.localUrlJS,
-        scriptRules: ['*']
-      },
-      {
-        script: this.bridgeJS,
-        scriptRules: ['*']
-      },
-      {
-        script: this.pluginJS,
-        scriptRules: ['*']
-      },
-      {
-        script: this.cordovaJS,
-        scriptRules: ['*']
-      },
-      {
-        script: this.cordovaPluginsFileJS,
-        scriptRules: ['*']
-      },
-      {
-        script: this.cordovaPluginsJS,
-        scriptRules: ['*']
-      },
-    ]
+    let items: ScriptItem[] = [{
+      script: this.getScriptString(),
+      scriptRules: ["*"]
+    }]
+    return items
   }
 }
