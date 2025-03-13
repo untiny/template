@@ -1,5 +1,7 @@
+import { Any } from "./Type"
+
 export default class PluginErrorResult {
   message?: string
   code?: string | null
-  data?: Object | null
+  data?: Any
 }

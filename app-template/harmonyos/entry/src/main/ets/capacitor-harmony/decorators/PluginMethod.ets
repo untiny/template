@@ -15,7 +15,6 @@ export const CAPACITOR_PLUGIN_METHOD = "capacitor:plugin:method";
 export const PluginMethod = (metadata?: PluginMethodMetadata): MethodDecorator => {
   metadata = metadata ?? { returnType: PluginMethodReturnType.PROMISE };
   return <T>(target: Object, propertyKey: string | Symbol, descriptor?: TypedPropertyDescriptor<T>) => {
-    console.log("PluginMethod", target.constructor.name, propertyKey)
     Reflect.defineMetadata(CAPACITOR_PLUGIN_METHOD, metadata, descriptor?.value);
     return descriptor;
   }

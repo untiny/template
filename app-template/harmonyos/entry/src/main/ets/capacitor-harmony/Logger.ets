@@ -1,9 +1,10 @@
-import { hilog } from "@kit.PerformanceAnalysisKit";
+import { hilog } from '@kit.PerformanceAnalysisKit';
+import CapConfig from './CapConfig';
 
 export default class Logger {
   public static DOMAIN = 0x0000;
   public static LOG_TAG_CORE = "Capacitor";
-  // public static config: CapConfig;
+  public static config: CapConfig;
   private static instance: Logger;
 
   private static getInstance() {
@@ -13,16 +14,13 @@ export default class Logger {
     return Logger.instance;
   }
 
-  // private loadConfig(config: CapConfig) {
-  //   Logger.config = config;
-  // }
+  private loadConfig(config: CapConfig) {
+    Logger.config = config;
+  }
 
 
-  public static init(
-    // config: CapConfig
-  ) {
-    Logger.getInstance()
-      // .loadConfig(config);
+  public static init(config: CapConfig) {
+    Logger.getInstance().loadConfig(config);
   }
 
   public static tags(...tags: string[]) {
@@ -110,7 +108,6 @@ export default class Logger {
   }
 
   public static shouldLog() {
-    return true;
-    // return !Logger.config || Logger.config.isLoggingEnabled();
+    return !Logger.config || Logger.config.isLoggingEnabled();
   }
 }

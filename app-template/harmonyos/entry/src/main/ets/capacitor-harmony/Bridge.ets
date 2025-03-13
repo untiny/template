@@ -9,8 +9,13 @@ import { TypeConstructor } from '@ohos.arkui.StateManagement';
 import { CAPACITOR_PLUGIN, PluginMetadata } from './decorators/CapacitorPlugin';
 import CapacitorHttp from './plugin/CapacitorHttp';
 import Logger from './Logger';
+import CapConfig from './CapConfig';
+import { BusinessError } from '@kit.BasicServicesKit';
 
 export class Bridge {
+  public static DEFAULT_WEB_ASSET_DIR = "public";
+  public static CAPACITOR_HTTP_SCHEME = "http";
+  public static CAPACITOR_HTTPS_SCHEME = "https";
   private context: Context = getContext();
   public webviewController = new webview.WebviewController();
   public messageHandler = new MessageHandler(this);
@@ -19,8 +24,10 @@ export class Bridge {
   private pluginInstances: List<Plugin> = new List<Plugin>();
   private plugins: HashMap<string, PluginHandle> = new HashMap<string, PluginHandle>();
   private savedCalls: HashMap<string, PluginCall> = new HashMap<string, PluginCall>();
+  private config: CapConfig
 
   constructor() {
+    this.config = CapConfig.loadDefault(this.getContext());
 
   }
 
@@ -37,6 +44,10 @@ export class Bridge {
       this.context = getContext();
     }
     return this.context;
+  }
+
+  public getConfig() {
+    return this.config;
   }
 
   public get javaScriptProxy(): JavaScriptProxy {
@@ -88,6 +99,7 @@ export class Bridge {
     if (!pluginId) {
       return;
     }
+    Logger.info("Register Plugin: " + pluginId);
     this.plugins.set(pluginId, new PluginHandle(plugin, this));
   }
 
@@ -142,7 +154,6 @@ export class Bridge {
   }
 
   public callPluginMethod(pluginId: string, methodName: string, call: PluginCall): void {
-    Logger.debug("are you ok?")
     try {
       let plugin = this.getPlugin(pluginId);
       if (!plugin) {
@@ -170,7 +181,9 @@ export class Bridge {
         if (call.isKeptAlive()) {
           this.saveCall(call);
         }
-      })()
+      })().catch((error: BusinessError) => {
+        Logger.debug("插件方法执行失败" + error.message + error.stack)
+      })
 
     } catch (error) {
       Logger.error(Logger.tags("callPluginMethod"), "error: " + error?.message)

@@ -1,8 +1,8 @@
-import { Bridge } from "./Bridge";
-import MessageHandler from "./MessageHandler";
-import PluginErrorResult from "./PluginErrorResult";
-import PluginResult from "./PluginResult";
-import { Any } from "./Type";
+import { Bridge } from './Bridge';
+import Logger from './Logger';
+import MessageHandler from './MessageHandler';
+import PluginErrorResult from './PluginErrorResult';
+import { Any } from './Type';
 
 export default class PluginCall {
   public static CALLBACK_ID_DANGLING: string = "-1";
@@ -13,8 +13,13 @@ export default class PluginCall {
   private data: Record<string, Any>
   private keepAlive: boolean = false;
 
-  constructor(msgHandler: MessageHandler, pluginId: string, callbackId: string, methodName: string,
-    data: Record<string, Any>) {
+  constructor(
+    msgHandler: MessageHandler,
+    pluginId: string,
+    callbackId: string,
+    methodName: string,
+    data: Record<string, Any>
+  ) {
     this.msgHandler = msgHandler;
     this.pluginId = pluginId;
     this.callbackId = callbackId;
@@ -22,20 +27,20 @@ export default class PluginCall {
     this.data = data;
   }
 
-  public successCallback(successResult: PluginResult) {
+  public successCallback(successResult: Any) {
     if (PluginCall.CALLBACK_ID_DANGLING === this.callbackId) {
       return;
     }
 
-    this.msgHandler.sendResponseMessage(this, successResult, null);
+    this.msgHandler.sendResponseMessage(this, successResult);
   }
 
-  // public resolve(data: Record<string, Any>): void
-  //
-  // public resolve(): void
+  public resolve(data: Any): void
+
+  public resolve(): void
 
   public resolve(data: Any = null) {
-    this.msgHandler.sendResponseMessage(this, data, null);
+    this.msgHandler.sendResponseMessage(this, data);
   }
 
   public errorCallback(message: string) {
@@ -47,7 +52,7 @@ export default class PluginCall {
   public reject(message: string, code: string | null, error: Error | null = null, data: Any = null): void {
     let errorResult = new PluginErrorResult();
     if (error !== null) {
-      console.error("Plugin", message, error);
+      Logger.error(Logger.tags("Plugin"), message + "\n\n" + error?.stack);
     }
     errorResult.message = message;
     errorResult.code = code;
@@ -97,8 +102,8 @@ export default class PluginCall {
     return Reflect.get(this.data, name) as Record<string, Any> ?? defaultValue;
   }
 
-  public getArray(name: string, defaultValue: Array<Object> = []): Array<Object> {
-    return Reflect.get(this.data, name) as Array<Object> ?? defaultValue;
+  public getArray(name: string, defaultValue: Any[] = []): Any[] {
+    return Reflect.get(this.data, name) as Any[] ?? defaultValue;
   }
 
   public setKeepAlive(keepAlive: boolean) {

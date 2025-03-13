@@ -1,8 +1,13 @@
 import { bridge } from '../capacitor-harmony/Bridge'
+import { webview } from '@kit.ArkWeb';
 
 @Entry
 @Component
 struct Index {
+  aboutToAppear(): void {
+    webview.WebviewController.setWebDebuggingAccess(true);
+  }
+
   build() {
     Column() {
       Web({ src: "http://192.168.10.170:5173/", controller: bridge.webviewController })

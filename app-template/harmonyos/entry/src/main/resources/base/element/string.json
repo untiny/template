@@ -11,6 +11,10 @@
     {
       "name": "EntryAbility_label",
       "value": "label"
+    },
+    {
+      "name": "reason_internet",
+      "value": "Allow the app to use the Internet network in HTTP request scenarios"
     }
   ]
 }

@@ -1,11 +1,12 @@
-import { Bridge } from './Bridge';
+import { bridge, Bridge } from './Bridge';
 import PluginCall from './PluginCall';
 import PluginHandle from './PluginHandle';
 import { HashMap, List } from '@kit.ArkTS';
-import JSObject from './JSObject';
 import { PluginMethod, PluginMethodReturnType } from './decorators/PluginMethod';
 import { PermissionCallback } from './decorators/PermissionCallback';
 import { AbilityConstant, Want } from '@kit.AbilityKit';
+import { Any } from './Type';
+import Logger from './Logger';
 
 export default class Plugin {
   // 我们将在持久化 Bundle 中使用的 JSON blob 的密钥。
@@ -19,11 +20,11 @@ export default class Plugin {
   private eventListeners: HashMap<string, List<PluginCall>>;
   private lastPluginCallId?: string;
   // 如果事件被解雇，则存储了事件的结果，并且尚未附上听众。仅存储最后一个值。
-  private retainedEventArguments: HashMap<string, List<JSObject>>;
+  private retainedEventArguments: HashMap<string, List<Any>>;
 
   constructor() {
     this.eventListeners = new HashMap<string, List<PluginCall>>();
-    this.retainedEventArguments = new HashMap<string, List<JSObject>>();
+    this.retainedEventArguments = new HashMap<string, List<Any>>();
   }
 
   public setPluginHandle(handle: PluginHandle) {
@@ -39,7 +40,7 @@ export default class Plugin {
   }
 
   public getBridge() {
-    return this.bridge;
+    return this.bridge ?? bridge
   }
 
   public getContext(): Context {
@@ -78,16 +79,16 @@ export default class Plugin {
     listeners.remove(call);
   }
 
-  protected notifyListeners(eventName: string, data: JSObject, retainUntilConsumed: boolean = false): void {
-    console.info("Notifying listeners for event " + eventName);
+  protected notifyListeners(eventName: string, data: Any, retainUntilConsumed: boolean = false): void {
+    Logger.info("Notifying listeners for event " + eventName);
     let listeners: List<PluginCall> = this.eventListeners.get(eventName);
     if (listeners === null || listeners.isEmpty()) {
-      console.debug("No listeners found for event " + eventName);
+      Logger.debug("No listeners found for event " + eventName);
       if (retainUntilConsumed) {
-        let argList: List<JSObject> = this.retainedEventArguments.get(eventName);
+        let argList: List<Any> = this.retainedEventArguments.get(eventName);
 
         if (argList === null) {
-          argList = new List<JSObject>();
+          argList = new List<Any>();
         }
 
         argList.add(data);
@@ -109,7 +110,7 @@ export default class Plugin {
   }
 
   private sendRetainedArgumentsForEvent(eventName: string): void {
-    let retainedArgs: List<JSObject> = this.retainedEventArguments.get(eventName);
+    let retainedArgs: List<Any> = this.retainedEventArguments.get(eventName);
     if (!retainedArgs) {
       return;
     }

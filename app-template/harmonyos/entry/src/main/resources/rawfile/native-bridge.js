@@ -1095,7 +1095,7 @@ var nativeBridge = (function (exports) {
             "web receive harmony callback event:",
             JSON.stringify(event)
           );
-          returnResult(event.data);
+          returnResult(event);
         });
       }
       /**

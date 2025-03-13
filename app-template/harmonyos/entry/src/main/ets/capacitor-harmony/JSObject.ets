@@ -1,8 +1,9 @@
-import { isInt, isObject } from "./Utils";
-import { JSON } from "@kit.ArkTS";
+import { isInt, isObject } from './Utils';
+import { JSON } from '@kit.ArkTS';
+import { Any } from './Type';
 
 export default class JSObject {
-  private json: Record<string, Object | null> = {};
+  protected json: Record<string, Object | null> = {};
 
   constructor()
 
@@ -29,12 +30,12 @@ export default class JSObject {
     return new JSObject(obj, keys);
   }
 
-  public get(name: string): Object {
-    return this.get(name);
+  public get(name: string): Any {
+    return Reflect.get(this.json, name) as Any;
   }
 
   public getString(name: string, defaultValue: string | null = null): string | null {
-    let value: Object = this.get(name);
+    let value: Any = this.get(name);
     if (value === null) {
       return defaultValue;
     }
@@ -47,7 +48,7 @@ export default class JSObject {
   }
 
   public getInteger(name: string, defaultValue: number | null = null): number | null {
-    let value: Object = this.get(name);
+    let value: Any = this.get(name);
     if (value === null) {
       return defaultValue;
     }
@@ -60,7 +61,7 @@ export default class JSObject {
   }
 
   public getNumber(name: string, defaultValue: number | null = null): number | null {
-    let value: Object = this.get(name);
+    let value: Any = this.get(name);
     if (value === null) {
       return defaultValue;
     }
@@ -73,7 +74,7 @@ export default class JSObject {
   }
 
   public getBoolean(name: string, defaultValue: boolean = false): boolean {
-    let value: Object = this.get(name);
+    let value: Any = this.get(name);
     if (value === null) {
       return defaultValue;
     }
@@ -86,7 +87,7 @@ export default class JSObject {
   }
 
   public getObject(name: string, defaultValue: Object | null = null): Object | null {
-    let value: Object = this.get(name);
+    let value: Any = this.get(name);
     if (value === null) {
       return defaultValue;
     }
@@ -98,8 +99,8 @@ export default class JSObject {
     return defaultValue;
   }
 
-  public getArray(name: string, defaultValue: Array<Object> = []): Array<Object> {
-    let value: Object = this.get(name);
+  public getArray(name: string, defaultValue: Array<Any> = []): Array<Any> {
+    let value: Any = this.get(name);
     if (value === null) {
       return defaultValue;
     }
@@ -113,7 +114,7 @@ export default class JSObject {
 
   public getJSObject(name: string, defaultValue: JSObject | null = null): JSObject | null {
     try {
-      let value: Object = this.get(name);
+      let value: Object = this.get(name) as Object;
       if (isObject(value)) {
         let keys = Object.keys(value);
         return new JSObject(value as Record<string, Object>, keys);
@@ -123,7 +124,7 @@ export default class JSObject {
     return defaultValue;
   }
 
-  public put(name: string, value: boolean | number | Date | Object | null) {
+  public put(name: string, value: Any) {
     this.json[name] = value;
   }
 

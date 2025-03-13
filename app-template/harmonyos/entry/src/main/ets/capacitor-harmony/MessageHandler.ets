@@ -1,7 +1,9 @@
 import { Bridge } from './Bridge';
+import { JavascriptInterface } from './decorators/JavascriptInterface';
 import Logger from './Logger';
 import PluginCall from './PluginCall';
-import PluginResult from './PluginResult';
+import PluginErrorResult from './PluginErrorResult';
+import { Any } from './Type';
 
 export interface MessageCallData {
   type?: 'message';
@@ -26,9 +28,30 @@ export interface ErrorCallData {
 
 export type CallData = MessageCallData | ErrorCallData;
 
+export interface PluginResult {
+  callbackId?: string;
+  methodName?: string;
+  data: Any;
+  success: boolean;
+  error?: PluginErrorResult;
+  pluginId?: string;
+  save?: boolean;
+}
+
+export class ResponseMessage implements PluginResult {
+  callbackId?: string;
+  methodName?: string;
+  data: Any = null;
+  success: boolean = true;
+  error?: PluginErrorResult;
+  pluginId?: string;
+  save?: boolean;
+}
+
+
 export default class MessageHandler {
   private bridge: Bridge;
-  private callback?: (event: Record<string, Object | null>) => void;
+  private callback?: (event: ResponseMessage) => void;
 
   constructor(bridge: Bridge) {
     this.bridge = bridge
@@ -38,6 +61,7 @@ export default class MessageHandler {
    * 前端发送消息到鸿蒙
    * @param postData
    */
+  @JavascriptInterface()
   public postMessage(postData: CallData): void {
     Logger.debug("MessageHandler", "Harmony receive web message: " + JSON.stringify(postData));
     try {
@@ -73,7 +97,8 @@ export default class MessageHandler {
    * 前端设置消息回调，鸿蒙通过回调函数将消息返回给前端
    * @param callback
    */
-  public onmessage(callback: (event: Record<string, Object | null>) => void) {
+  @JavascriptInterface()
+  public onmessage(callback: (event: ResponseMessage) => void) {
     this.callback = callback;
   }
 
@@ -82,34 +107,31 @@ export default class MessageHandler {
    */
   public sendResponseMessage(
     call: PluginCall,
-    successResult: Object | null,
-    errorResult: Object | null
+    successResult: Any,
+    errorResult?: PluginErrorResult
   ): void {
     try {
-      let data = new PluginResult();
-      data.put("save", call.isKeptAlive());
-      data.put("callbackId", call.getCallbackId());
-      data.put("pluginId", call.getPluginId());
-      data.put("methodName", call.getMethodName());
+      let response = new ResponseMessage();
+      response.save = call.isKeptAlive();
+      response.callbackId = call.getCallbackId();
+      response.pluginId = call.getPluginId();
+      response.methodName = call.getMethodName();
 
-      let pluginResultInError: boolean = errorResult !== null;
-      if (pluginResultInError) {
-        data.put("success", false);
-        data.put("error", errorResult);
-        Logger.debug("Sending plugin error: " + JSON.stringify(data));
+      if (errorResult) {
+        response.success = false;
+        response.error = errorResult;
+        Logger.debug("Sending plugin error: " + JSON.stringify(response));
       } else {
-        data.put("success", true);
-        if (successResult !== null) {
-          data.put("data", successResult);
-        }
+        response.success = true;
+        response.data = successResult;
       }
 
       let isValidCallbackId = call.getCallbackId() !== PluginCall.CALLBACK_ID_DANGLING;
       if (isValidCallbackId) {
         if (this.callback != null) {
-          this.callback(data.toObject());
+          this.callback(response);
         } else {
-          this.legacySendResponseMessage(data.toObject());
+          this.legacySendResponseMessage(response);
         }
       } else {
         // this.bridge.getApp().fireRestoredResult(data);
@@ -122,13 +144,17 @@ export default class MessageHandler {
     }
   }
 
-  private legacySendResponseMessage(data: Record<string, Object | null>) {
+  private legacySendResponseMessage(data: ResponseMessage) {
     let runScript = "window.Capacitor.fromNative(" + JSON.stringify(data) + ")";
     this.bridge.webviewController.runJavaScript(runScript);
   }
 
-  private callPluginMethod(callbackId: string, pluginId: string, methodName: string,
-    methodData: Record<string, Object | null>): void {
+  private callPluginMethod(
+    callbackId: string,
+    pluginId: string,
+    methodName: string,
+    methodData: Record<string, Any>
+  ): void {
     let call = new PluginCall(this, pluginId, callbackId, methodName, methodData)
     this.bridge.callPluginMethod(pluginId, methodName, call);
   }
