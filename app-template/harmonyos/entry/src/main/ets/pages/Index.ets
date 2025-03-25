@@ -1,4 +1,4 @@
-import { bridge } from '../capacitor-harmony/Bridge'
+import { bridge } from '../capacitor-harmony/Bridge';
 import { webview } from '@kit.ArkWeb';
 
 @Entry
@@ -10,7 +10,7 @@ struct Index {
 
   build() {
     Column() {
-      Web({ src: "http://192.168.10.170:5173/", controller: bridge.webviewController })
+      Web({ src: bridge.getLocalUrl(), controller: bridge.webviewController })
         .javaScriptProxy(bridge.javaScriptProxy)
         .javaScriptOnDocumentStart(bridge.injectorScripts)
         .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
@@ -23,6 +23,12 @@ struct Index {
         .mixedMode(MixedMode.All)
         .verticalScrollBarAccess(false)
         .cacheMode(CacheMode.Default)
+        .onInterceptRequest(bridge.onInterceptRequest)
     }
+  }
+
+  onBackPress(): boolean | void {
+    bridge.onBackPressed();
+    return true;
   }
 }

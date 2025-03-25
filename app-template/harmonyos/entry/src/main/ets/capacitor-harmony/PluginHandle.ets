@@ -82,6 +82,8 @@ export default class PluginHandle {
     if (!methodHandle) {
       throw new Error("No method " + methodName + " found for plugin " + this.pluginClass.name);
     }
-    Reflect.get(this.instance as Plugin, methodHandle.getName(), this.instance)(call);
+    let plugin: ESObject = this.instance as Plugin;
+    let method = methodHandle.getName();
+    plugin[method](call);
   }
 }

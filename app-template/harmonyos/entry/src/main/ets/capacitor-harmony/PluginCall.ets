@@ -49,14 +49,14 @@ export default class PluginCall {
     this.msgHandler.sendResponseMessage(this, null, errorResult);
   }
 
-  public reject(message: string, code: string | null, error: Error | null = null, data: Any = null): void {
+  public reject(message: string, code?: string, error?: Error, data?: Any): void {
     let errorResult = new PluginErrorResult();
-    if (error !== null) {
+    if (error) {
       Logger.error(Logger.tags("Plugin"), message + "\n\n" + error?.stack);
     }
     errorResult.message = message;
     errorResult.code = code;
-    if (data !== null) {
+    if (data) {
       errorResult.data = data
     }
     this.msgHandler.sendResponseMessage(this, null, errorResult);

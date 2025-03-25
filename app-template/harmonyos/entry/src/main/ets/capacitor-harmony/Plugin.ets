@@ -51,6 +51,10 @@ export default class Plugin {
     return this.getContext().applicationInfo.name;
   }
 
+  public getConfig() {
+    return this.bridge?.getConfig().getPluginConfiguration(this.handle?.getId() as string);
+  }
+
   /**
    * Called when the plugin has been connected to the bridge
    * and is ready to start initializing.
@@ -82,12 +86,12 @@ export default class Plugin {
   protected notifyListeners(eventName: string, data: Any, retainUntilConsumed: boolean = false): void {
     Logger.info("Notifying listeners for event " + eventName);
     let listeners: List<PluginCall> = this.eventListeners.get(eventName);
-    if (listeners === null || listeners.isEmpty()) {
+    if (!listeners || listeners.isEmpty()) {
       Logger.debug("No listeners found for event " + eventName);
       if (retainUntilConsumed) {
         let argList: List<Any> = this.retainedEventArguments.get(eventName);
 
-        if (argList === null) {
+        if (!argList) {
           argList = new List<Any>();
         }
 
@@ -175,6 +179,12 @@ export default class Plugin {
   }
 
   /**
+   * Handle onRestart
+   */
+  public handleOnRestart(): void {
+  }
+
+  /**
    * Handle onResume
    */
   public handleOnResume(): void {
@@ -187,8 +197,18 @@ export default class Plugin {
   }
 
   /**
+   * Handle onStop
+   */
+  public handleOnStop(): void {
+  }
+
+  /**
    * Handle onDestroy
    */
   public handleOnDestroy(): void {
+  }
+
+  public getLogType(): string {
+    return Logger.tags(this.constructor.name);
   }
 }

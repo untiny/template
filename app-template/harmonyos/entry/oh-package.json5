@@ -1,10 +1,26 @@
 {
-  "name": "entry",
-  "version": "1.0.0",
-  "description": "Please describe the basic information.",
-  "main": "",
-  "author": "",
-  "license": "",
-  "dependencies": {}
+    "name": "entry",
+    "version": "1.0.0",
+    "description": "Please describe the basic information.",
+    "main": "",
+    "author": "",
+    "license": "",
+    "dependencies": {
+        "@mpaas/framework": "1.0.241015152559",
+        "@mpaas/scanapp": "1.0.250221101406",
+        "@mpaas/hrivermini": "1.0.241126170312",
+        "@mpaas/xriverohos": "1.0.241219201836",
+        "@mpaas/mpaas_permission_fortress": "1.0.241108152953",
+        "@mpaas/nebulaintegration": "1.0.250103104257",
+        "@mpaas/antui": "1.0.240923202012",
+        "@mpaas/mpaas_commonability": "1.0.250120171428",
+        "@mpaas/apframework": "1.0.240924092945",
+        "@mpaas/exthub": "1.0.240924093118",
+        "@mpaas/mpaas_ocr_core": "1.0.240927163949",
+        "@mpaas/mpaas_xmediacorebiz": "1.0.241031173920",
+        "@mpaas/hos_license": "1.0.240927162415",
+        "@mpaas/mpaas_xmedia": "1.0.241031173920"
+    },
+    "devDependencies": {},
+    "dynamicDependencies": {}
 }
-

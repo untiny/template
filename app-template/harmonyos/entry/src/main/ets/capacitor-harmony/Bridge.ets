@@ -1,4 +1,4 @@
-import { webview } from '@kit.ArkWeb'
+import { webview } from '@kit.ArkWeb';
 import JSExport from './JSExport';
 import MessageHandler from './MessageHandler';
 import PluginCall from './PluginCall';
@@ -11,6 +11,9 @@ import CapacitorHttp from './plugin/CapacitorHttp';
 import Logger from './Logger';
 import CapConfig from './CapConfig';
 import { BusinessError } from '@kit.BasicServicesKit';
+import App from './App';
+import { AbilityConstant, Want } from '@kit.AbilityKit';
+import { window } from '@kit.ArkUI';
 
 export class Bridge {
   public static DEFAULT_WEB_ASSET_DIR = "public";
@@ -19,16 +22,19 @@ export class Bridge {
   private context: Context = getContext();
   public webviewController = new webview.WebviewController();
   public messageHandler = new MessageHandler(this);
-  private localUrl: string = "http://192.168.10.170:5173";
+  private localUrl: string = "http://localhost/";
   private initialPlugins: List<TypeConstructor<Plugin>> = new List<TypeConstructor<Plugin>>();
   private pluginInstances: List<Plugin> = new List<Plugin>();
   private plugins: HashMap<string, PluginHandle> = new HashMap<string, PluginHandle>();
   private savedCalls: HashMap<string, PluginCall> = new HashMap<string, PluginCall>();
-  private config: CapConfig
+  private config?: CapConfig
+  private app: App;
+  private backPressedCallbacks = new List<() => void>();
+  private windowStage?: window.WindowStage
 
   constructor() {
-    this.config = CapConfig.loadDefault(this.getContext());
-
+    // this.config = CapConfig.loadDefault(this.getContext());
+    this.app = new App()
   }
 
   public start() {
@@ -41,13 +47,29 @@ export class Bridge {
 
   public getContext() {
     if (!this.context) {
-      this.context = getContext();
+      this.context = getContext()
     }
     return this.context;
   }
 
   public getConfig() {
-    return this.config;
+    return this.config ?? CapConfig.loadDefault(this.getContext());
+  }
+
+  public getApp() {
+    return this.app;
+  }
+
+  public getLocalUrl() {
+    return this.localUrl
+  }
+
+  public setWindowStage(windowStage: window.WindowStage) {
+    this.windowStage = windowStage;
+  }
+
+  public getWindowStage() {
+    return this.windowStage;
   }
 
   public get javaScriptProxy(): JavaScriptProxy {
@@ -71,6 +93,64 @@ export class Bridge {
       "window.WEBVIEW_SERVER_URL = '" + this.localUrl + "';",
     ];
     return [{ script: scripts.join("\n\n"), scriptRules: ["*"] }];
+  }
+
+  private getMimeType(path: string): string {
+    let mimeType: string = '';
+    if (path.endsWith(".html")) {
+      mimeType = "text/html";
+    } else if (path.endsWith('.js') || path.endsWith('.mjs')) {
+      mimeType = "application/javascript";
+    } else if (path.endsWith(".wasm")) {
+      mimeType = "application/wasm";
+    } else if (path.endsWith(".css")) {
+      mimeType = "text/css";
+    } else if (path.endsWith(".svg")) {
+      mimeType = "image/svg+xml";
+    } else if (path.endsWith(".png")) {
+      mimeType = "image/png";
+    } else if (path.endsWith(".webp")) {
+      mimeType = "image/webp";
+    } else if (path.endsWith(".jpg")) {
+      mimeType = "image/jpeg";
+    }
+    return mimeType;
+  }
+
+  public onInterceptRequest = (event: OnInterceptRequestEvent): WebResourceResponse | null => {
+    let url = event?.request.getRequestUrl();
+    console.log('onInterceptRequest url: ' + url)
+
+    if (url.startsWith(this.localUrl)) {
+      let path = url.replace(this.localUrl, 'public/');
+      if (path === 'public/') {
+        path += 'index.html';
+      }
+      console.log("rawfile path:", path);
+      let response = new WebResourceResponse();
+      let mimeType = this.getMimeType(path);
+      response.setResponseData($rawfile(path));
+      response.setResponseMimeType(mimeType);
+      response.setResponseEncoding('utf-8');
+      response.setResponseCode(200);
+      response.setReasonMessage('OK');
+      response.setResponseIsReady(true);
+      response.setResponseHeader([
+        {
+          headerKey: 'Access-Control-Allow-Origin', headerValue: '*'
+        },
+        {
+          headerKey: 'Connection', headerValue: 'keep-alive'
+        },
+        {
+          headerKey: 'Cache-Control', headerValue: 'no-cache'
+        },
+      ]);
+
+      return response;
+    }
+
+    return null;
   }
 
   public addPlugin(plugin: TypeConstructor<Plugin>): void {
@@ -194,6 +274,82 @@ export class Bridge {
 
   public getPlugin(pluginId: string) {
     return this.plugins.get(pluginId);
+  }
+
+  public onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {
+    this.plugins.forEach((pluginHandle) => {
+      pluginHandle?.getInstance()?.handleOnNewWant(want, launchParam);
+    })
+  }
+
+  public onRestart() {
+    this.plugins.forEach((pluginHandle) => {
+      pluginHandle?.getInstance()?.handleOnRestart();
+    })
+  }
+
+  public onStart() {
+    this.plugins.forEach((pluginHandle) => {
+      pluginHandle?.getInstance()?.handleOnStart();
+    })
+  }
+
+  public onResume() {
+    this.plugins.forEach((pluginHandle) => {
+      pluginHandle?.getInstance()?.handleOnResume();
+    })
+  }
+
+  public onPause() {
+    this.plugins.forEach((pluginHandle) => {
+      pluginHandle?.getInstance()?.handleOnPause();
+    })
+  }
+
+  public onStop() {
+    this.plugins.forEach((pluginHandle) => {
+      pluginHandle?.getInstance()?.handleOnStop();
+    })
+  }
+
+  public onDestroy() {
+    this.plugins.forEach((pluginHandle) => {
+      pluginHandle?.getInstance()?.handleOnDestroy();
+    })
+  }
+
+  public onBackPressed() {
+    this.backPressedCallbacks.forEach(callback => {
+      callback()
+    })
+  }
+
+  public addBackPressedCallback(callback: () => void) {
+    this.backPressedCallbacks.add(callback)
+  }
+
+  public eval(js: string, callback?: () => void) {
+    this.webviewController.runJavaScript(js)
+  }
+
+  public logToJs(message: string, level: string = 'log') {
+    this.eval("window.Capacitor.logJs(\"" + message + "\", \"" + level + "\")");
+  }
+
+  public triggerJSEvent(eventName: string, target: string, data?: string) {
+    if (data) {
+      this.eval("window.Capacitor.triggerEvent(\"" + eventName + "\", \"" + target + "\", " + data + ")");
+    } else {
+      this.eval("window.Capacitor.triggerEvent(\"" + eventName + "\", \"" + target + "\")");
+    }
+  }
+
+  public triggerWindowJSEvent(eventName: string, data?: string) {
+    this.triggerJSEvent(eventName, "window", data);
+  }
+
+  public triggerDocumentJSEvent(eventName: string, data?: string) {
+    this.triggerJSEvent(eventName, "document", data);
   }
 }
 

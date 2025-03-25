@@ -8,6 +8,7 @@ import PluginConfig from '../PluginConfig';
 import { Any } from '../Type';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { http } from '@kit.NetworkKit';
+import { MimeType } from './util/MimeType';
 
 export interface HttpResponse {
   /**
@@ -41,12 +42,32 @@ export enum ResponseType {
 
 @CapacitorPlugin()
 export default class CapacitorHttp extends Plugin {
+  public load() {
+    // this.bridge?.webviewController.registerJavaScriptProxy(this, 'CapacitorHttpAndroidInterface', ["isEnabled"])
+    super.load();
+  }
+
+  private getExpectDataType(responseType: ResponseType): http.HttpDataType {
+    console.log("responseType", responseType)
+    switch (responseType) {
+      case ResponseType.ARRAY_BUFFER:
+        return http.HttpDataType.ARRAY_BUFFER;
+      case ResponseType.BLOB:
+      case ResponseType.JSON:
+        return http.HttpDataType.OBJECT;
+      case ResponseType.TEXT:
+      case ResponseType.DOCUMENT:
+        return http.HttpDataType.STRING;
+    }
+  }
+
   private http(call: PluginCall, httpMethod?: http.RequestMethod) {
     let url = call.getString("url", "") as string;
     let headers = call.getObject("headers", {}) as Object;
-    let params = call.getObject("params", {});
-    let connectTimeout = call.getNumber("connectTimeout");
-    let readTimeout = call.getNumber("readTimeout");
+    let params = call.getObject("params", {}) as Record<string, string>;
+    let data = call.getObject("data", {}) as Record<string, Any>;
+    let connectTimeout = call.getNumber("connectTimeout") as number;
+    let readTimeout = call.getNumber("readTimeout") as number;
     let disableRedirects = call.getBoolean("disableRedirects");
     let shouldEncode = call.getBoolean("shouldEncodeUrlParams", true);
     let responseType = call.getString("responseType", ResponseType.TEXT);
@@ -59,16 +80,23 @@ export default class CapacitorHttp extends Plugin {
     let isHttpMutate =
       method === http.RequestMethod.DELETE || method === http.RequestMethod.POST || method === http.RequestMethod.PUT;
 
+    let expectDataType = this.getExpectDataType(responseType as ResponseType);
+
+    let options: http.HttpRequestOptions = {
+      method,
+      header: headers,
+      connectTimeout,
+      readTimeout,
+      expectDataType,
+      extraData: isHttpMutate ? data : params
+    }
+
+    Logger.debug("CapacitorHttp", JSON.stringify({ url, options }))
+
     let httpRequest = http.createHttp();
     httpRequest.request(
       url,
-      {
-        header: headers,
-        connectTimeout,
-        readTimeout,
-        // expectDataType: dataType,
-        extraData: params,
-      },
+      options,
       (err: BusinessError, data: http.HttpResponse) => {
         Logger.debug("CapacitorHttp", JSON.stringify(data))
         if (!err) {
@@ -80,6 +108,13 @@ export default class CapacitorHttp extends Plugin {
           console.info('cookies:' + JSON.stringify(data.cookies)); // 8+
           // 当该请求使用完毕时，调用destroy方法主动销毁
           httpRequest.destroy();
+          let contentType = data.header["content-type"] as string;
+          if (
+            contentType && typeof data.result === 'string' &&
+            this.isOneOf(contentType, [MimeType.APPLICATION_JSON, MimeType.APPLICATION_VND_API_JSON])
+          ) {
+            data.result = JSON.parse(data.result);
+          }
           let response: HttpResponse = {
             data: data.result,
             status: data.responseCode,
@@ -97,6 +132,10 @@ export default class CapacitorHttp extends Plugin {
         }
       }
     )
+  }
+
+  private isOneOf(contentType: string, mimeTypes: MimeType[]) {
+    return mimeTypes.some(mimeType => contentType.includes(mimeType))
   }
 
   @JavascriptInterface()
@@ -127,7 +166,7 @@ export default class CapacitorHttp extends Plugin {
 
   @PluginMethod()
   public patch(call: PluginCall): void {
-    this.http(call, http.RequestMethod.POST);
+    call.unimplemented();
   }
 
   @PluginMethod()

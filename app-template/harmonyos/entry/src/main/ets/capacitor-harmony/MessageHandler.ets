@@ -83,7 +83,9 @@ export default class MessageHandler {
             ", pluginId: " +
             pluginId +
             ", methodName: " +
-            methodName
+            methodName +
+            ", options: " +
+          JSON.stringify(methodData)
         );
 
         this.callPluginMethod(callbackId, pluginId, methodName, methodData);

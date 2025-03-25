@@ -951,7 +951,6 @@ var nativeBridge = (function (exports) {
     };
     function initNativeBridge(win) {
       const cap = win.Capacitor || {};
-      console.log("Capacitor initNativeBridge", JSON.stringify(cap));
       
       // keep a collection of callbacks for native response data
       const callbacks = new Map();
@@ -1185,24 +1184,8 @@ var nativeBridge = (function (exports) {
       initEvents(win, cap);
       initLegacyHandlers(win, cap);
       initVendor(win, cap);
-      win.Capacitor = cap;
-      console.log("Capacitor initNativeBridge done", JSON.stringify( win.Capacitor));
-      
+      win.Capacitor = cap;      
     }
-
-    // w.addEventListener('message', function (event) {
-    //   if (event.data === '__init_port__') {
-    //     if (event.ports[0] !== null) {
-    //       w.harmonyBridge = event.ports[0]; // 1. 保存从应用侧发送过来的端口。
-    //       console.log("注册 harmonyBridge");
-    //       w.harmonyBridge.onmessage = function (event) {
-    //         returnResult(JSON.parse(event.data));
-    //       };
-    //       initNativeBridge(w);
-    //     }
-    //     initNativeBridge(w);
-    //   }
-    // });
 
     initNativeBridge(w);
   };

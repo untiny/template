@@ -21,6 +21,7 @@ export default class BridgeAbility extends UIAbility {
   onWindowStageCreate(windowStage: window.WindowStage): void {
     bridge.start();
     this.windowStage = windowStage;
+    bridge.setWindowStage(windowStage);
     // 设置WindowStage的事件订阅（获焦/失焦、切到前台/切到后台、前台可交互/前台不可交互）
     this.onWindowStageEvent();
     // 创建主窗口，为该功能设置主页面
@@ -84,9 +85,11 @@ export default class BridgeAbility extends UIAbility {
             break;
           case window.WindowStageEventType.RESUMED: // 前台可交互状态
             Logger.info(Logger.tags('WindowStage'), 'resumed.');
+            bridge.onResume()
             break;
           case window.WindowStageEventType.PAUSED: // 前台不可交互状态
             Logger.info(Logger.tags('WindowStage'), 'paused.');
+            bridge.onPause();
             break;
           default:
             break;
@@ -107,11 +110,16 @@ export default class BridgeAbility extends UIAbility {
   }
 
   onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {
-
+    bridge.onNewWant(want, launchParam);
   }
 
 
   onDestroy() {
     Logger.debug('App onDestroy');
+    bridge.onDestroy()
+  }
+
+  onBackPressed(): boolean {
+    return true;
   }
 }

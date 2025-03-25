@@ -54,9 +54,19 @@
         "reason": "$string:reason_internet",
         "usedScene": {
           "abilities": [
-            "MainAbility"
+            "EntryAbility"
           ],
           "when": "inuse"
+        }
+      },
+      {
+        "name": "ohos.permission.CAMERA",
+        "reason": "$string:permission_reason_camera",
+        "usedScene": {
+          "abilities": [
+            "EntryAbility"
+          ],
+          "when": "always"
         }
       }
     ]
