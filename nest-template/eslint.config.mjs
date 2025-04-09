@@ -22,5 +22,8 @@ export default antfu(
       '@typescript-eslint/no-unsafe-argument': 'warn',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
     },
+    ignores: [
+      'prisma/generated/**',
+    ]
   },
 );

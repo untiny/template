@@ -15,7 +15,7 @@ datasource db {
 
 generator kysely {
   provider = "prisma-kysely"
-  fileName = "kysely.generated.ts"
+  fileName = "kysely.generated.d.ts"
 }
 
 model User {

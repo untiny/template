@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
+import { INestApplication, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { Prisma, PrismaClient } from '@prisma/client'
-import { blue, cyan, green } from 'kolorist'
+import { blue, green } from 'kolorist'
 import { Kysely, MysqlAdapter, MysqlIntrospector, MysqlQueryCompiler } from 'kysely'
 import prismaExtensionKysely from 'prisma-extension-kysely'
 import { DB } from 'prisma/generated/kysely.generated'
@@ -22,7 +22,6 @@ function extendClient(prisma: PrismaService) {
         },
         plugins: [
           // Add your favorite plugins here!
-
         ],
       }),
   })
@@ -32,7 +31,7 @@ function extendClient(prisma: PrismaService) {
 export type ExtendedPrismaClient = ReturnType<typeof extendClient>
 
 @Injectable()
-export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Prisma.LogLevel> implements OnModuleInit, OnModuleDestroy {
+export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Prisma.LogLevel | 'beforeExit'> implements OnModuleInit, OnModuleDestroy {
   private enableDebug: boolean = false
 
   constructor(private readonly configService: ConfigService) {
@@ -61,6 +60,13 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Pris
     await this.$disconnect()
   }
 
+  async enableShutdownHooks(app: INestApplication) {
+    Logger.log('Enable shutdown hooks', PrismaService.name)
+    this.$on('beforeExit', async () => {
+      await app.close()
+    })
+  }
+
   public static create(configService: ConfigService): ExtendedPrismaClient {
     const prisma = new PrismaService(configService)
     return extendClient(prisma)
@@ -71,15 +77,15 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Pris
   public $extendTransaction = (this as ExtendedPrismaClient).$transaction
 
   private handleError(event: Prisma.LogEvent) {
-    Logger.error(cyan(event.message), PrismaService.name)
+    Logger.error(event.message, PrismaService.name)
   }
 
   private handleInfo(event: Prisma.LogEvent) {
-    Logger.log(cyan(event.message), PrismaService.name)
+    Logger.log(event.message, PrismaService.name)
   }
 
   private handleWarn(event: Prisma.LogEvent) {
-    Logger.warn(cyan(event.message), PrismaService.name)
+    Logger.warn(event.message, PrismaService.name)
   }
 
   private handleQuery(event: Prisma.QueryEvent) {
