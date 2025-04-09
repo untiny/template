@@ -11,7 +11,10 @@ export function useWinston() {
       }),
       format.ms(),
       format.errors({ stack: true }),
-      format.printf(({ context, level, message, timestamp, stack, ms, type, path, status, method, ...other }) => {
+      format.printf((params) => {
+        const { context, level, message, timestamp, stack, ms, type, path, status, method, ...other } = params
+        console.log(JSON.stringify(params, null, 2))
+
         const logs: string[] = [
           typeof timestamp !== 'undefined' ? `${timestamp} ` : '',
           `${level} `,
