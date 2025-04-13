@@ -1,5 +1,6 @@
 import type { NestExpressApplication } from '@nestjs/platform-express'
 import process from 'node:process'
+import { ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
 import consola from 'consola'
@@ -17,6 +18,17 @@ async function bootstrap() {
   const port = configService.get<number>('APP_PORT', 3000)
 
   app.enableShutdownHooks()
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: false,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    })
+  )
 
   await useSwagger(app)
 

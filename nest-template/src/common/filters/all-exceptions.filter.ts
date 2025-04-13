@@ -6,6 +6,7 @@ import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError, PrismaC
 import { isArray, isObject } from 'lodash'
 import { throwError } from 'rxjs'
 import { Socket } from 'socket.io'
+import { ExceptionResponseDto } from '../dto/exception-response.dto'
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -15,17 +16,19 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const status = this.getStatus(exception)
     const message = this.getMessage(exception)
     const stack = exception instanceof Error ? exception.stack : undefined
+    const context = exception instanceof Error ? exception.constructor.name : undefined
+    const exceptionResponse = new ExceptionResponseDto(message, status, context)
     switch (host.getType()) {
       case 'http':
-        return this.handleHttpError(host, status, message, stack)
+        return this.handleHttpError(host, exceptionResponse, stack)
       case 'ws':
-        return this.handleWsError(host, status, message, stack)
+        return this.handleWsError(host, exceptionResponse, stack)
       case 'rpc':
-        return this.handleRpcError(host, status, message, stack)
+        return this.handleRpcError(host, exceptionResponse, stack)
     }
   }
 
-  handleHttpError(host: ArgumentsHost, status: HttpStatus, message: string, stack?: string) {
+  handleHttpError(host: ArgumentsHost, exceptionResponse: ExceptionResponseDto, stack?: string) {
     const ctx = host.switchToHttp()
     const { httpAdapter } = this.httpAdapterHost
     const request = ctx.getRequest<Request>()
@@ -35,16 +38,14 @@ export class AllExceptionsFilter implements ExceptionFilter {
       type: host.getType().toLocaleUpperCase(),
       method: request.method,
       path: request.url,
-      status,
-      message,
       stack,
-      xxx: 'xxx',
+      ...exceptionResponse,
     })
 
-    httpAdapter.reply(response, { message }, status)
+    httpAdapter.reply(response, exceptionResponse, exceptionResponse.status)
   }
 
-  handleWsError(host: ArgumentsHost, status: HttpStatus, message: string, stack?: string) {
+  handleWsError(host: ArgumentsHost, exceptionResponse: ExceptionResponseDto, stack?: string) {
     const ctx = host.switchToWs()
     const client = ctx.getClient<Socket>()
     const pattern = ctx.getPattern()
@@ -52,46 +53,42 @@ export class AllExceptionsFilter implements ExceptionFilter {
     this.logger({
       type: host.getType().toLocaleUpperCase(),
       path: pattern,
-      status,
-      message,
       stack,
+      ...exceptionResponse,
       payload,
     })
-    client.emit('exception', { message })
+
+    client.emit('exception', exceptionResponse)
   }
 
-  handleRpcError(host: ArgumentsHost, status: HttpStatus, message: string, stack?: string) {
+  handleRpcError(host: ArgumentsHost, exceptionResponse: ExceptionResponseDto, stack?: string) {
     const ctx = host.switchToRpc()
     const pattern = ctx.getContext()?.getPattern()
     const payload = ctx.getData()
     this.logger({
       type: host.getType().toLocaleUpperCase(),
       path: pattern,
-      status,
-      message,
       stack,
+      ...exceptionResponse,
       payload,
     })
-    return throwError(() => ({ message }))
+
+    return throwError(() => exceptionResponse)
   }
 
-  logger(params: {
-    message: string
-    stack?: string
+  logger(params: ExceptionResponseDto & {
     type?: string
     path?: string
-    status: HttpStatus
     method?: string
     [key: string]: any
   }) {
-    const { message, stack, ...other } = params
     if (params.status === HttpStatus.NOT_FOUND) {
       return
     }
-    // if (params.status >= HttpStatus.INTERNAL_SERVER_ERROR) {
-    // }
-    Logger.error(params.message, stack, other)
-    Logger.warn(params.message, other)
+    if (params.status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+      Logger.error(params, params.stack)
+    }
+    Logger.warn(params)
   }
 
   getMessage(exception: unknown): string {
@@ -140,6 +137,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
     else {
       message = JSON.stringify(exception)
+    }
+    if (isArray(message)) {
+      message = message.join('\n')
     }
     return message ?? 'unknown error'
   }
