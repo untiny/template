@@ -1,6 +1,6 @@
 /* eslint-disable unused-imports/no-unused-vars */
 /* eslint-disable no-console */
-import { ValidationError, ValidationPipe, ValidationPipeOptions } from '@nestjs/common'
+import { HttpStatus, UnprocessableEntityException, ValidationError, ValidationPipe, ValidationPipeOptions } from '@nestjs/common'
 import { getMetadataStorage, ValidationArguments } from 'class-validator'
 import { ValidationMetadata } from 'class-validator/types/metadata/ValidationMetadata'
 import { getApiPropertyOptions } from './utils'
@@ -160,7 +160,8 @@ function exceptionFactory(errors: ValidationError[]) {
   errors = formatValidationErrors(errors)
   console.log(errors)
   const formattedErrors = flattenValidationErrors(errors)
-  return formattedErrors.join('\n') || 'Validation failed'
+  const message = formattedErrors.join('\n') || 'Validation failed'
+  throw new UnprocessableEntityException(message)
 }
 
 export function useValidationPipe(options?: ValidationPipeOptions): ValidationPipe {
@@ -168,14 +169,16 @@ export function useValidationPipe(options?: ValidationPipeOptions): ValidationPi
     transform: true, // 自动转换请求参数类型，如将字符串转换为数字类型
     whitelist: true, // 自动移除请求参数中未定义的属性
     forbidNonWhitelisted: false, // 当请求参数中包含未定义的属性时，抛出错误
-    // transformOptions: {
-    //   enableImplicitConversion: true, // 启用隐式类型转换，如将字符串转换为数字类型
-    // },
+    transformOptions: {
+      enableImplicitConversion: true, // 启用隐式类型转换，如将字符串转换为数字类型
+    },
     dismissDefaultMessages: false, // 是否禁用错误消息，默认为false
     validationError: {
       target: true,
       value: true,
     },
+    stopAtFirstError: false, // 当遇到第一个错误时停止验证，默认为false
+    errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY, // 当验证失败时返回的HTTP状态码，默认为422
     exceptionFactory,
   }
   return new ValidationPipe({ ...defaultOptions, ...options })

@@ -1,7 +1,56 @@
-import { Controller } from '@nestjs/common';
-import { UserService } from './user.service';
+import { Controller, Get, Param, ParseIntPipe, Query, UseGuards } from '@nestjs/common'
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger'
+import { AuthUser } from 'src/auth/decorators'
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard'
+import { CursorPaginationDto } from 'src/common/dto/pagination.dto'
+import { UserService } from './user.service'
 
-@Controller('user')
+@ApiTags('User')
+@Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Get()
+  @ApiOperation({ summary: '获取用户列表' })
+  async getUsers(@Query() query: CursorPaginationDto) {
+    return await this.userService.getUsers(query)
+  }
+
+  @Get('@me')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: '获取当前用户信息' })
+  @ApiBearerAuth()
+  async getCurrentUser(@AuthUser('id') id: number) {
+    return await this.userService.getUser(id)
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: '获取用户信息' })
+  async getUser(@Param('id', ParseIntPipe) id: number) {
+    return await this.userService.getUser(id)
+  }
+
+  // @Patch('@me')
+  // @ApiOperation({ summary: '更新当前用户信息' })
+  // async updateCurrentUser() {
+  //   return await this.userService.updateCurrentUser()
+  // }
+
+  // @Patch(':id')
+  // @ApiOperation({ summary: '更新用户信息' })
+  // async updateUser() {
+  //   return await this.userService.updateUser()
+  // }
+
+  // @Delete('@me')
+  // @ApiOperation({ summary: '删除当前用户' })
+  // async deleteCurrentUser() {
+  //   return await this.userService.deleteCurrentUser()
+  // }
+
+  // @Delete(':id')
+  // @ApiOperation({ summary: '删除用户' })
+  // async deleteUser() {
+  //   return await this.userService.deleteUser()
+  // }
 }

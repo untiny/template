@@ -1,5 +1,7 @@
-import { ConflictException, Injectable } from '@nestjs/common'
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
+import { isNil } from 'lodash'
+import { CursorPaginationDto } from 'src/common/dto/pagination.dto'
 import { PrismaService } from 'src/prisma/prisma.service'
 
 @Injectable()
@@ -28,5 +30,29 @@ export class UserService {
     return await this.prismaService.user.create({
       data,
     })
+  }
+
+  async getUser(id: number) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id },
+    })
+    if (!user) {
+      throw new NotFoundException('用户不存在')
+    }
+  }
+
+  async getUsers(query: CursorPaginationDto) {
+    const cursor = query.before || query.after
+    const users = await this.prismaService.user.findMany({
+      orderBy: {
+        id: isNil(query.after) ? 'desc' : 'asc',
+      },
+      cursor: isNil(cursor) ? undefined : { id: cursor },
+      skip: isNil(query.before || query.after)
+        ? undefined
+        : 1,
+      take: query.limit,
+    })
+    return users
   }
 }

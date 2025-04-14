@@ -86,9 +86,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
       return
     }
     if (params.status >= HttpStatus.INTERNAL_SERVER_ERROR) {
-      Logger.error(params, params.stack)
+      return Logger.error(params, params.stack)
     }
-    Logger.warn(params)
+    return Logger.warn(params)
   }
 
   getMessage(exception: unknown): string {

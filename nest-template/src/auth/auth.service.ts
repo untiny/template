@@ -5,10 +5,9 @@ import { ConfigService } from '@nestjs/config'
 import { JwtService, JwtSignOptions, TokenExpiredError } from '@nestjs/jwt'
 import { Cache } from 'cache-manager'
 import { isEqual } from 'lodash'
-import ms from 'ms'
 import { Env } from 'src/generated/env'
 import { UserService } from 'src/user/user.service'
-import { TokenResponseDto } from './dto/login.dto'
+import { LoginDto, TokenResponseDto } from './dto/login.dto'
 import { RegisterDto } from './dto/register.dto'
 
 @Injectable()
@@ -41,7 +40,11 @@ export class AuthService {
     return isEqual(user.password, hashPassword) ? { id: user.id } : null
   }
 
-  async login(user: RequestUser): Promise<TokenResponseDto> {
+  async login(loginDto: LoginDto): Promise<TokenResponseDto> {
+    const user = await this.validateUser(loginDto.email, loginDto.password)
+    if (!user) {
+      throw new UnauthorizedException('用户名或密码错误')
+    }
     return await this.generateToken(user)
   }
 
@@ -53,37 +56,31 @@ export class AuthService {
   }
 
   async refreshToken(refreshToken: string): Promise<TokenResponseDto> {
-    let user: RequestUser | null = null
+    // 判断是否为已失效的token, 避免重复刷新
+    const isExpired = await this.cache.get<boolean>(`expired_refresh_token:${refreshToken}`)
+
+    if (isExpired) {
+      throw new UnauthorizedException('刷新令牌已失效')
+    }
+
     try {
-      user = await this.jwtService.verifyAsync<RequestUser>(refreshToken, this.refreshJwt)
+      const user = await this.jwtService.verifyAsync<RequestUser>(refreshToken, this.refreshJwt)
+      // 计算剩余过期时间
+      const remainingTime = (user.exp! - Date.now() / 1000) * 1000
+      await this.cache.set(`expired_refresh_token:${refreshToken}`, true, remainingTime)
+      return await this.generateToken(user)
     }
     catch (error) {
       if (error instanceof TokenExpiredError) {
-        user = this.jwtService.decode<RequestUser>(refreshToken, { json: true })
+        throw new UnauthorizedException('刷新令牌已过期')
       }
+      throw error
     }
-    if (user) {
-      const cacheRefreshToken = await this.cache.get<string>(`refresh_token:${user.id}`)
-      if (refreshToken === cacheRefreshToken) {
-        return await this.generateToken(user, true)
-      }
-    }
-
-    throw new UnauthorizedException('刷新令牌已过期或无效')
   }
 
-  async generateToken(user: RequestUser, reset?: boolean): Promise<TokenResponseDto> {
-    if (reset) {
-      await this.cache.del(`refresh_token:${user.id}`)
-    }
+  async generateToken(user: RequestUser): Promise<TokenResponseDto> {
     const accessToken = await this.jwtService.signAsync({ id: user.id }, this.accessJwt)
-    let refreshToken = await this.cache.get<string>(`refresh_token:${user.id}`)
-    if (!refreshToken) {
-      refreshToken = await this.jwtService.signAsync({ id: user.id }, this.refreshJwt)
-      const ttl = Number(ms('7d')) + Number(ms('10m')) // 允许过期十分钟内刷新
-      await this.cache.set(`refresh_token:${user.id}`, refreshToken, ttl)
-    }
-
+    const refreshToken = await this.jwtService.signAsync({ id: user.id }, this.refreshJwt)
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
