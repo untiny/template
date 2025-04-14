@@ -2,6 +2,7 @@ import type { NestExpressApplication } from '@nestjs/platform-express'
 import { networkInterfaces } from 'node:os'
 import { Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { Env } from 'src/generated/env'
 
 // 获取当前设备的IP地址
 export function ips(): string[] {
@@ -14,7 +15,7 @@ export function ips(): string[] {
 }
 
 export async function useServerUrl(app: NestExpressApplication) {
-  const configService = app.get<ConfigService>(ConfigService)
+  const configService = app.get<ConfigService<Env>>(ConfigService)
   const path = configService.get<string>('SWAGGER_DOCS_PATH', 'api-docs')
   const port = configService.get<number>('APP_PORT', 3000)
 

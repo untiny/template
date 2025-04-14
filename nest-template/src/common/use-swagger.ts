@@ -5,6 +5,7 @@ import type { Request, Response } from 'express'
 import { ConfigService } from '@nestjs/config'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { apiReference } from '@scalar/nestjs-api-reference'
+import { Env } from 'src/generated/env'
 
 class ScalarModule {
   static setup(path: string, app: INestApplication, document: OpenAPIObject, metaData?: { title?: string, description?: string }) {
@@ -29,7 +30,7 @@ class ScalarModule {
 }
 
 export async function useSwagger(app: NestExpressApplication) {
-  const configService = app.get<ConfigService>(ConfigService)
+  const configService = app.get<ConfigService<Env>>(ConfigService)
   const path = configService.get<string>('SWAGGER_DOCS_PATH', 'api-docs')
   const title = configService.get<string>('SWAGGER_DOCS_TITLE', 'API Reference')
   const description = configService.get<string>('SWAGGER_DOCS_DESCRIPTION', 'The service API description')

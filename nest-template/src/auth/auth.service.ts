@@ -1,21 +1,36 @@
 import { hash } from 'node:crypto'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common'
-import { JwtService, TokenExpiredError } from '@nestjs/jwt'
+import { ConfigService } from '@nestjs/config'
+import { JwtService, JwtSignOptions, TokenExpiredError } from '@nestjs/jwt'
 import { Cache } from 'cache-manager'
 import { isEqual } from 'lodash'
 import ms from 'ms'
+import { Env } from 'src/generated/env'
 import { UserService } from 'src/user/user.service'
 import { TokenResponseDto } from './dto/login.dto'
 import { RegisterDto } from './dto/register.dto'
 
 @Injectable()
 export class AuthService {
+  private accessJwt: JwtSignOptions
+  private refreshJwt: JwtSignOptions
+
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
-    @Inject(CACHE_MANAGER) private readonly cache: Cache
-  ) {}
+    @Inject(CACHE_MANAGER) private readonly cache: Cache,
+    private readonly configService: ConfigService<Env>,
+  ) {
+    this.accessJwt = {
+      secret: this.configService.get<string>('JWT_ACCESS_SECRET') as string,
+      expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRES_IN', '15m'),
+    }
+    this.refreshJwt = {
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET') as string,
+      expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d'),
+    }
+  }
 
   async validateUser(email: string, password: string): Promise<RequestUser | null> {
     const user = await this.userService.getUserByEmail(email)
@@ -40,9 +55,7 @@ export class AuthService {
   async refreshToken(refreshToken: string): Promise<TokenResponseDto> {
     let user: RequestUser | null = null
     try {
-      user = await this.jwtService.verifyAsync<RequestUser>(refreshToken, {
-        secret: 'secret1',
-      })
+      user = await this.jwtService.verifyAsync<RequestUser>(refreshToken, this.refreshJwt)
     }
     catch (error) {
       if (error instanceof TokenExpiredError) {
@@ -63,16 +76,10 @@ export class AuthService {
     if (reset) {
       await this.cache.del(`refresh_token:${user.id}`)
     }
-    const accessToken = await this.jwtService.signAsync({ id: user.id }, {
-      secret: 'secret',
-      expiresIn: '15m',
-    })
+    const accessToken = await this.jwtService.signAsync({ id: user.id }, this.accessJwt)
     let refreshToken = await this.cache.get<string>(`refresh_token:${user.id}`)
     if (!refreshToken) {
-      refreshToken = await this.jwtService.signAsync({ id: user.id }, {
-        secret: 'secret1',
-        expiresIn: '7s',
-      })
+      refreshToken = await this.jwtService.signAsync({ id: user.id }, this.refreshJwt)
       const ttl = Number(ms('7d')) + Number(ms('10m')) // 允许过期十分钟内刷新
       await this.cache.set(`refresh_token:${user.id}`, refreshToken, ttl)
     }

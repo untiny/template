@@ -1,10 +1,12 @@
 generator client {
   provider = "prisma-client-js"
+  output = "../node_modules/.prisma/client"
 }
 
 generator kysely {
   provider = "prisma-kysely"
-  fileName = "kysely.generated.d.ts"
+  fileName = "index.ts"
+  output = "../src/generated/kysely"
 }
 
 datasource db {

@@ -1,12 +1,12 @@
-/* eslint-disable no-console */
 import { INestApplication, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { Prisma, PrismaClient } from '@prisma/client'
+import consola from 'consola'
 import { blue, green } from 'kolorist'
 import { Kysely, MysqlAdapter, MysqlIntrospector, MysqlQueryCompiler } from 'kysely'
 import prismaExtensionKysely from 'prisma-extension-kysely'
-import { DB } from 'prisma/generated/kysely.generated'
-import { format } from 'sql-formatter'
+import { format, FormatOptionsWithLanguage } from 'sql-formatter'
+import { DB } from 'src/generated/kysely'
 
 function extendClient(prisma: PrismaService) {
   const kyselyExtension = prismaExtensionKysely({
@@ -77,7 +77,7 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Pris
   public $extendTransaction = (this as ExtendedPrismaClient).$transaction
 
   private handleError(event: Prisma.LogEvent) {
-    Logger.error(event.message, PrismaService.name)
+    Logger.error(event.message, null, PrismaService.name)
   }
 
   private handleInfo(event: Prisma.LogEvent) {
@@ -93,28 +93,26 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Pris
       return
     }
     const params = this.parseParams(event)
+    const config: FormatOptionsWithLanguage = {
+      language: 'mysql',
+      keywordCase: 'upper',
+    }
     if (Array.isArray(params)) {
-      const sql = format(event.query, {
-        language: 'mysql',
-        keywordCase: 'upper',
-        params,
-      })
-      console.log(sql)
+      config.params = params
+      const sql = format(event.query as string, config)
+      consola.log(sql)
     }
     else {
-      const sql = format(event.query, {
-        language: 'mysql',
-        keywordCase: 'upper',
-      })
-      console.log(sql)
-      console.log(blue(params))
+      const sql = format(event.query as string, config)
+      consola.log(sql)
+      consola.log(blue(params))
     }
   }
 
   private parseParams(event: Prisma.QueryEvent): string[] | string {
     const dateRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3} UTC$/
     try {
-      const params: unknown[] = event.params ? JSON.parse(event.params) : []
+      const params: unknown[] = event.params ? JSON.parse(event.params as string) : []
       return params.map((param) => {
         if (typeof param === 'string') {
           if (dateRegex.test(param)) {

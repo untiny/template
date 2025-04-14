@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsEmail, IsJWT, IsStrongPassword, MaxLength } from 'class-validator'
+import { IsEmail, IsJWT, IsStrongPassword, MaxLength, MinLength } from 'class-validator'
 
 export class LoginDto {
   @ApiProperty({ title: 'Email', type: String, example: 'i@ooix.cn' })
@@ -24,5 +24,6 @@ export class TokenResponseDto {
 
   @ApiProperty({ title: 'RefreshToken', type: String })
   @IsJWT()
+  @MinLength(20)
   refresh_token: string
 }
