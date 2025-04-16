@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { apiReference } from '@scalar/nestjs-api-reference'
 import { Env } from 'src/generated/env'
+import { Language, languages } from './enums/language.enum'
 
 class ScalarModule {
   static setup(path: string, app: INestApplication, document: OpenAPIObject, metaData?: { title?: string, description?: string }) {
@@ -42,6 +43,29 @@ export async function useSwagger(app: NestExpressApplication) {
     .setDescription(description)
     .setVersion(version)
     .addBearerAuth()
+    .addGlobalParameters(
+      {
+        name: 'Accept-Language',
+        in: 'header',
+        description: '客户端语言',
+        schema: { type: 'string', enum: languages, example: Language.ZH_CN },
+      },
+      {
+        name: 'Timezone',
+        in: 'header',
+        description: '客户端时区',
+        schema: {
+          type: 'string',
+          enum: [
+            'Asia/Shanghai',
+            'Asia/Hong_Kong',
+            'America/New_York',
+            'Etc/Universal',
+          ],
+          example: 'Asia/Shanghai',
+        },
+      },
+    )
     .build()
 
   const document = SwaggerModule.createDocument(app, config)

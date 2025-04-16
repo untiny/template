@@ -21,22 +21,16 @@ function getTypeIsArrayTuple(
 }
 
 export type PropertyOptions = Omit<ApiPropertyOptions, 'title'> & {
-  'x-i18n-title'?: Record<'zh_CN' | 'en_US', string>
-  'title'?: string | Record<'zh_CN' | 'en_US', string>
+  'x-i18n-title'?: Record<Language, string>
+  'title'?: string | Record<Language, string>
 }
 
 export function Property(options?: PropertyOptions) {
   options = options ?? {}
 
-  if (typeof options.title === 'string') {
-    options['x-i18n-title'] = {
-      zh_CN: options.title,
-      en_US: options.title,
-    }
-  }
-  else if (typeof options.title === 'object') {
+  if (typeof options.title === 'object') {
     options['x-i18n-title'] = options.title
-    options.title = options['x-i18n-title'].zh_CN
+    options.title = options['x-i18n-title']['zh-cn']
   }
 
   const decorators = [ApiProperty(options as ApiPropertyOptions)]

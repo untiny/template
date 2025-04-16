@@ -2,11 +2,15 @@ import { Body, Controller, Get, Post } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import { IsNotEmpty, IsNumber, IsString, ValidateNested } from 'class-validator'
+import { ClsService } from 'nestjs-cls'
 import { AppService } from './app.service'
 import { Property } from './common/decorators'
 
 export class ValidationNestedDto {
-  @Property({ title: '字符串' })
+  @Property({ title: {
+    'zh-CN': '字符串',
+    'en-US': 'String',
+  } })
   @IsString()
   @IsNotEmpty()
   string: string
@@ -25,8 +29,8 @@ export class ValidationDto {
   @Property({
     type: ValidationNestedDto,
     title: {
-      zh_CN: '对象',
-      en_US: 'Object',
+      'zh-CN': '对象',
+      'en-US': 'Object',
     },
   })
   @Type(() => ValidationNestedDto)
@@ -42,10 +46,11 @@ export class ValidationDto {
 @ApiTags('App')
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly appService: AppService, private readonly cls: ClsService) {}
 
   @Get()
   getHello() {
+    return this.cls.get()
     return this.appService.getHello()
   }
 

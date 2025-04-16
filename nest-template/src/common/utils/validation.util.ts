@@ -1,8 +1,10 @@
-import { HttpStatus, Logger, UnprocessableEntityException, ValidationError, ValidationPipe, ValidationPipeOptions } from '@nestjs/common'
+import { Logger, ValidationError } from '@nestjs/common'
 import { getMetadataStorage, ValidationArguments } from 'class-validator'
 import { ValidationMetadata } from 'class-validator/types/metadata/ValidationMetadata'
-import { getApiPropertyOptions } from './utils'
-import { BuildMessage, ValidationMessage, ValidationMessageOptions } from './validation-message'
+import { uniq } from 'lodash'
+import { getValidationBuildMessage, ValidationMessageArguments, ValidationMethod } from '../constants/validation-message.constant'
+import { Language } from '../enums/language.enum'
+import { getPropertyTitle } from './swagger-metadata.util'
 
 function prependConstraintsWithParentProp(
   parentPath: string,
@@ -42,10 +44,11 @@ function mapChildrenToValidationErrors(
 function flattenValidationErrors(
   validationErrors: ValidationError[],
 ): string[] {
-  return validationErrors
+  const messages = validationErrors
     .flatMap(error => mapChildrenToValidationErrors(error))
     .filter(item => !!item.constraints)
     .flatMap(item => Object.values(item.constraints!).filter(item => !!item))
+  return uniq(messages)
 }
 
 function getValidationMetadata(
@@ -119,17 +122,15 @@ function replaceMessageSpecialTokens(
   return messageString
 }
 
-function formatValidationErrors(validationErrors: ValidationError[]) {
+function formatValidationErrors(validationErrors: ValidationError[], language: Language = Language.ZH_CN) {
   return validationErrors.map((error) => {
     if (error.children && error.children.length > 0) {
-      error.children = formatValidationErrors(error.children)
+      error.children = formatValidationErrors(error.children, language)
     }
     const target = error.target! as object
     const validationMetadata = getValidationMetadata(target, error.property)
-    const propertyOptions = getApiPropertyOptions(target, error.property)
-    console.log(propertyOptions)
-
-    error.property = propertyOptions?.title ?? error.property // 替换错误消息中的属性名称
+    const propertyTitle = getPropertyTitle(target, error.property, language)
+    error.property = propertyTitle ?? error.property // 替换错误消息中的属性名称
     error.constraints = error.constraints ?? {}
     for (const key in error.constraints) {
       if (
@@ -143,13 +144,13 @@ function formatValidationErrors(validationErrors: ValidationError[]) {
             // 判断constraint是否为error.target的属性，是则替换为属性名称, 否则返回原字符串
             if (typeof constraint === 'string' && Object.prototype.hasOwnProperty.call(target, constraint)) {
               // 对于自定义验证的时候或许有用
-              const propertyOptions = getApiPropertyOptions(target, constraint)
-              return propertyOptions?.title ?? constraint
+              const propertyTitle = getPropertyTitle(target, error.property, language)
+              return propertyTitle ?? constraint
             }
             return constraint
           })
         }
-        const args: ValidationMessageOptions = {
+        const args: ValidationMessageArguments = {
           object: error.target as object,
           value: error.value,
           targetName: (error.target as object)?.constructor?.name,
@@ -157,7 +158,7 @@ function formatValidationErrors(validationErrors: ValidationError[]) {
           constraints: metadata?.constraints,
           each: metadata?.each ?? false,
         }
-        const buildMessage: BuildMessage = ValidationMessage.zh_CN[key]
+        const buildMessage = getValidationBuildMessage(language, key as ValidationMethod)
         if (!buildMessage) {
           Logger.warn(`未找到 ${key} 的错误消息`, 'ValidationPipe')
           continue
@@ -170,29 +171,9 @@ function formatValidationErrors(validationErrors: ValidationError[]) {
   })
 }
 
-function exceptionFactory(errors: ValidationError[]) {
-  errors = formatValidationErrors(errors)
+export function formatValidationErrorMessage(errors: ValidationError[], language: Language = Language.ZH_CN): string {
+  errors = formatValidationErrors(errors, language)
   const formattedErrors = flattenValidationErrors(errors)
   const message = formattedErrors.join('\n') || 'Validation failed'
-  throw new UnprocessableEntityException(message)
-}
-
-export function useValidationPipe(options?: ValidationPipeOptions): ValidationPipe {
-  const defaultOptions: ValidationPipeOptions = {
-    transform: true, // 自动转换请求参数类型，如将字符串转换为数字类型
-    whitelist: true, // 自动移除请求参数中未定义的属性
-    forbidNonWhitelisted: false, // 当请求参数中包含未定义的属性时，抛出错误
-    transformOptions: {
-      enableImplicitConversion: true, // 启用隐式类型转换，如将字符串转换为数字类型
-    },
-    dismissDefaultMessages: true, // 是否禁用错误消息，默认为false
-    validationError: {
-      target: true,
-      value: true,
-    },
-    stopAtFirstError: true, // 当遇到第一个错误时停止验证，默认为false
-    errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY, // 当验证失败时返回的HTTP状态码，默认为422
-    exceptionFactory,
-  }
-  return new ValidationPipe({ ...defaultOptions, ...options })
+  return message
 }

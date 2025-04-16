@@ -43,6 +43,7 @@
     "@nestjs/websockets": "^11.0.13",
     "@prisma/client": "6.6.0",
     "@scalar/nestjs-api-reference": "^0.4.6",
+    "accept-language": "^3.0.20",
     "bcrypt": "^5.1.1",
     "cache-manager": "^6.4.2",
     "class-transformer": "^0.5.1",
@@ -54,6 +55,7 @@
     "lodash": "^4.17.21",
     "ms": "3.0.0-canary.1",
     "nest-winston": "^1.10.2",
+    "nestjs-cls": "^5.4.2",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
@@ -62,6 +64,7 @@
     "rxjs": "^7.8.1",
     "socket.io": "^4.8.1",
     "sql-formatter": "^15.5.2",
+    "ua-parser-js": "^2.0.3",
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0"
   },

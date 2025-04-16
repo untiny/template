@@ -6,7 +6,6 @@ import consola from 'consola'
 import { AppModule } from './app.module'
 import { useServerUrl } from './common/use-server-url'
 import { useSwagger } from './common/use-swagger'
-import { useValidationPipe } from './common/use-validation-pipe'
 import { useWinston } from './common/use-winston'
 import { Env } from './generated/env'
 
@@ -19,8 +18,6 @@ async function bootstrap() {
   const port = configService.get<number>('APP_PORT', 3000)
 
   app.enableShutdownHooks()
-
-  app.useGlobalPipes(useValidationPipe())
 
   await useSwagger(app)
 

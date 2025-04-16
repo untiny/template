@@ -80,15 +80,14 @@ export class AllExceptionsFilter implements ExceptionFilter {
     type?: string
     path?: string
     method?: string
+    stack?: string
     [key: string]: any
   }) {
-    if (params.status === HttpStatus.NOT_FOUND) {
-      return
-    }
+    const { stack, ...optionalParams } = params
     if (params.status >= HttpStatus.INTERNAL_SERVER_ERROR) {
-      return Logger.error(params, params.stack)
+      return Logger.error(optionalParams, stack)
     }
-    return Logger.warn(params)
+    return Logger.warn(optionalParams)
   }
 
   getMessage(exception: unknown): string {
@@ -96,6 +95,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (typeof exception === 'string') {
       message = exception
     }
+    // else if (exception instanceof ValidationException) {
+    //   message = formatValidationErrorMessage(exception.errors, this.cls.get('language'))
+    // }
     else if (exception instanceof HttpException) {
       const error = exception.getResponse()
       if (typeof error === 'string') {
