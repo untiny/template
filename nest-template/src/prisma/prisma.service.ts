@@ -77,7 +77,8 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Pris
   public $extendTransaction = (this as ExtendedPrismaClient).$transaction
 
   private handleError(event: Prisma.LogEvent) {
-    Logger.error(event.message, null, PrismaService.name)
+    event.message = event.message.split('\n').pop() as string
+    Logger.error(`${event.target} ${event.message}`, null, PrismaService.name)
   }
 
   private handleInfo(event: Prisma.LogEvent) {

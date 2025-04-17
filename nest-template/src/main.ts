@@ -1,8 +1,7 @@
 import type { NestExpressApplication } from '@nestjs/platform-express'
-import process from 'node:process'
+import { Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
-import consola from 'consola'
 import { AppModule } from './app.module'
 import { useServerUrl } from './common/use-server-url'
 import { useSwagger } from './common/use-swagger'
@@ -22,7 +21,7 @@ async function bootstrap() {
   await useSwagger(app)
 
   process?.on('SIGINT', async () => {
-    consola.info('Shutting down...')
+    Logger.log('Shutting down...', 'Bootstrap')
     await app.close()
   })
 
@@ -34,6 +33,6 @@ async function bootstrap() {
 }
 
 bootstrap().catch((error) => {
-  consola.error(error)
+  Logger.error(error)
   process?.exit?.(1)
 })

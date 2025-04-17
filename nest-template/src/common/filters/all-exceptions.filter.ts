@@ -2,7 +2,7 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logge
 import { HttpAdapterHost } from '@nestjs/core'
 import { RpcException } from '@nestjs/microservices'
 import { WsException } from '@nestjs/websockets'
-import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library'
+import { Prisma } from '@prisma/client'
 import { isArray, isObject } from 'lodash'
 import { throwError } from 'rxjs'
 import { Socket } from 'socket.io'
@@ -39,6 +39,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
       method: request.method,
       path: request.url,
       stack,
+      headers: request.headers,
+      payload: request.body,
       ...exceptionResponse,
     })
 
@@ -87,6 +89,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (params.status >= HttpStatus.INTERNAL_SERVER_ERROR) {
       return Logger.error(optionalParams, stack)
     }
+    Logger.error(optionalParams, stack)
     return Logger.warn(optionalParams)
   }
 
@@ -114,15 +117,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
       const error = exception.getError()
       message = typeof error === 'string' ? error : Reflect.get(error, 'message')
     }
-    else if (exception instanceof Error) {
-      message = exception.message
-    }
     else if (
-      exception instanceof PrismaClientValidationError
-      || exception instanceof PrismaClientKnownRequestError
-      || exception instanceof PrismaClientUnknownRequestError
+      exception instanceof Prisma.PrismaClientValidationError
+      || exception instanceof Prisma.PrismaClientKnownRequestError
+      || exception instanceof Prisma.PrismaClientUnknownRequestError
     ) {
-      const { code, meta } = exception as PrismaClientKnownRequestError
+      const { code, meta } = exception as Prisma.PrismaClientKnownRequestError
       const messages = [
         exception.name,
         code,
@@ -130,6 +130,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
         exception.message.split('\n').pop(), // Prisma 得异常信息都是包括有代码的，只有最后一行才是人类可读的
       ]
       message = messages.filter(Boolean).join(' ')
+    }
+    else if (exception instanceof Error) {
+      message = exception.message
     }
     else if (isArray(exception)) {
       message = exception.join(';\n')
@@ -156,7 +159,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       return exception.getStatus()
     }
-    if (exception instanceof PrismaClientKnownRequestError) {
+    if (exception instanceof Prisma.PrismaClientKnownRequestError) {
       switch (exception.code) {
         case 'P2000':
         case 'P2003':
@@ -172,7 +175,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           return HttpStatus.INTERNAL_SERVER_ERROR
       }
     }
-    if (exception instanceof PrismaClientValidationError) {
+    if (exception instanceof Prisma.PrismaClientValidationError) {
       return HttpStatus.BAD_REQUEST
     }
     return HttpStatus.INTERNAL_SERVER_ERROR
