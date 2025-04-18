@@ -1,60 +1,123 @@
 import type { LoggerService } from '@nestjs/common'
+import { hash } from 'node:crypto'
 import { sep } from 'node:path'
-import { inspect } from 'node:util'
+import { Cache, createCache } from 'cache-manager'
 import { isDefined } from 'class-validator'
 import { blue, cyan, gray, green, magenta, red, yellow } from 'kolorist'
 import { isEmpty } from 'lodash'
-import { utilities, WinstonModule } from 'nest-winston'
+import { TransformableInfo } from 'logform'
+import { WinstonModule } from 'nest-winston'
 import { format, transports } from 'winston'
+import * as TransportStream from 'winston-transport'
 import 'winston-daily-rotate-file'
 
-function formatStack(stack: string, message: string) {
-  const cwd = process.cwd() + sep
+const SPACE = ' '
 
-  const lines = stack
-    .split('\n')
-    .splice(message.split('\n').length)
-    .map(l => l.trim().replace('file://', '').replace(cwd, ''))
-
-  return lines.map(
-    line =>
-      `  ${
-        line
-          .replace(/^at +/, m => gray(m))
-          .replace(/\((.+)\)/, (_, m) => `(${cyan(m as string)})`)}`,
-  )
-    .join(`\n`)
+function joinLine(...items: string[]) {
+  return items.join('')
 }
 
-function prettyLog() {
+function formatStack(stack: string, message: string, options?: {
+  colors?: boolean
+  paths?: boolean
+}) {
+  let lines = stack
+    .split('\n')
+    .splice(message.split('\n').length)
+    .map(l => l.trim())
+
+  if (options?.paths) {
+    const cwd = process.cwd() + sep
+    lines = lines.map(l => l.replace('file://', '').replace(cwd, ''))
+  }
+
+  // 格式化堆栈信息
+  lines = lines.map(
+    (line) => {
+      return joinLine(
+        SPACE.repeat(4),
+        line
+          .replace(/^at +/, m => options?.colors ? gray(m) : m)
+          .replace(/\((.+)\)/, (_, m) => `(${options?.colors ? cyan(m as string) : m})`)
+      )
+    }
+  )
+
+  return `\n${lines.join('\n')}\n`
+}
+
+function formatLog() {
   return format.printf((options) => {
     const { level, timestamp, context, message, type, method, status, path, payload, stack, ...other } = options
     const headers = other.headers as Record<string, string> | undefined
     delete other.headers
-    const messages = [
-      `[${level}] ${String(process?.pid)} - ${timestamp} ${context ? `[${context}] ` : ''}${message}`,
-      `[${type}] - ${method ? `${method} ` : ''}${status} ${path} "${headers?.referer ?? '--'}" "${headers?.['user-agent'] ?? '--'}"`,
-    ]
+
+    // 组装日志信息
+    const main: string[] = []
+    main.push(`[${level}]`, SPACE)
+    if (isDefined(process?.pid)) {
+      main.push(String(process.pid).padEnd(6), SPACE)
+    }
+    if (isDefined(timestamp)) {
+      main.push(timestamp as string, SPACE)
+    }
+    if (isDefined(context)) {
+      main.push(`[${context}]`, SPACE)
+    }
+    if (isDefined(message)) {
+      main.push(message as string)
+    }
+
+    const messages = [joinLine(...main)]
+
+    // 组装堆栈信息
+    if (!isEmpty(stack)) {
+      messages.push(formatStack(String(stack), String(message)))
+    }
+
+    // 组装请求信息
+    const request: string[] = []
+    if (isDefined(type)) {
+      request.push(`[${type}]`, SPACE, '-', SPACE)
+    }
+    if (isDefined(method)) {
+      request.push(method as string, SPACE)
+    }
+    if (isDefined(status)) {
+      request.push(status as string, SPACE)
+    }
+    if (isDefined(path)) {
+      request.push(path as string, SPACE)
+    }
+    if (isDefined(headers?.referer)) {
+      request.push(`"${headers.referer}"`, SPACE)
+    }
+    if (isDefined(headers?.['user-agent'])) {
+      request.push(`"${headers['user-agent']}"`)
+    }
+    if (request.length > 0) {
+      messages.push(request.join(''))
+    }
+
+    // 组装其他信息
     if (headers?.authorization) {
-      messages.push(`[Authorization] - ${headers.authorization}`,)
+      messages.push(joinLine('[Authorization]', SPACE, '-', SPACE, headers.authorization))
     }
     if (headers?.cookie) {
-      messages.push(`[Cookie] - ${headers.cookie}`,)
+      messages.push(joinLine('[Cookie]', SPACE, '-', SPACE, headers.cookie))
     }
     if (!isEmpty(payload)) {
-      messages.push(`[Payload] - ${JSON.stringify(payload)}`,)
+      messages.push(joinLine('[Payload]', SPACE, '-', SPACE, JSON.stringify(payload)))
     }
     if (!isEmpty(other)) {
-      messages.push(`[Other] - ${JSON.stringify(other)}`,)
+      messages.push(joinLine('[Other]', SPACE, '-', SPACE, JSON.stringify(other)))
     }
-    if (!isEmpty(stack)) {
-      messages.push(stack as string)
-    }
+
     return messages.join('\n')
   })
 }
 
-function prettyPrint(appName?: string) {
+function consolePrintf(appName?: string) {
   const nestLikeColorScheme: Record<string, (text: string) => string> = {
     log: green,
     error: red,
@@ -75,75 +138,154 @@ function prettyPrint(appName?: string) {
 
     const color = nestLikeColorScheme[level] ?? noColor
 
-    const logs: string[] = []
-    const SPACE = ' '
-
+    // 组装日志信息
+    const main: string[] = []
     if (isDefined(appName)) {
-      logs.push(color(`[${appName}]`), SPACE)
+      main.push(color(`[${appName}]`), SPACE)
     }
     if (isDefined(process?.pid)) {
-      logs.push(color(String(process.pid)).padEnd(6), SPACE)
+      main.push(color(String(process.pid)).padEnd(6), SPACE)
     }
     if (isDefined(timestamp)) {
-      logs.push(timestamp as string, SPACE)
+      main.push(timestamp as string, SPACE)
     }
-    logs.push(color(level.toUpperCase().padStart(7)), SPACE)
+    main.push(color(level.toUpperCase().padStart(7)), SPACE)
     if (isDefined(context)) {
-      logs.push(yellow(`[${context}]`), SPACE)
+      main.push(yellow(`[${context}]`), SPACE)
     }
     if (isDefined(message)) {
-      logs.push(color(message as string))
+      main.push(color(message as string))
     }
     if (isDefined(ms)) {
-      logs.push(SPACE, yellow(ms as string))
+      main.push(SPACE, yellow(ms as string))
     }
 
-    const messages = [
-      logs.join(''),
-      // `[${type}] - ${method ? `${method} ` : ''}${status} ${path} "${headers?.referer ?? '--'}" "${headers?.['user-agent'] ?? '--'}"`,
-    ]
+    const messages = [joinLine(...main)]
 
+    if (process?.env.DEBUG !== 'true') {
+      return messages.join('\n')
+    }
+
+    // 组装堆栈信息
+    if (!isEmpty(stack)) {
+      messages.push(formatStack(String(stack), String(message), {
+        colors: true,
+        paths: true,
+      }))
+    }
+
+    // 组装请求信息
     const request: string[] = []
     if (isDefined(type)) {
-      request.push(blue(`[${type}]`), SPACE, '-', SPACE)
+      request.push(blue(`[${type}]`), SPACE, gray('-'), SPACE)
     }
     if (isDefined(method)) {
-      request.push(blue(method as string), SPACE)
+      request.push(method as string, SPACE)
     }
     if (isDefined(status)) {
-      request.push(blue(status as string), SPACE)
+      request.push(status as string, SPACE)
     }
     if (isDefined(path)) {
       request.push(cyan(path as string), SPACE)
     }
     if (isDefined(headers?.referer)) {
-      request.push(`"${headers.referer}"`, SPACE)
+      request.push(gray(`"${headers.referer}"`), SPACE)
     }
     if (isDefined(headers?.['user-agent'])) {
-      request.push(`"${headers['user-agent']}"`)
+      request.push(gray(`"${headers['user-agent']}"`))
     }
-
     if (request.length > 0) {
       messages.push(request.join(''))
     }
 
+    // 组装其他信息
     if (headers?.authorization) {
-      messages.push(`[Authorization] - ${headers.authorization}`,)
+      messages.push(joinLine(blue('[Authorization]'), SPACE, gray('-'), SPACE, headers.authorization))
     }
     if (headers?.cookie) {
-      messages.push(`[Cookie] - ${headers.cookie}`,)
+      messages.push(joinLine(blue('[Cookie]'), SPACE, gray('-'), SPACE, headers.cookie))
     }
     if (!isEmpty(payload)) {
-      messages.push(`[Payload] - ${JSON.stringify(payload)}`,)
+      messages.push(joinLine(blue('[Payload]'), SPACE, gray('-'), SPACE, JSON.stringify(payload)))
     }
     if (!isEmpty(other)) {
-      messages.push(`[Other] - ${JSON.stringify(other)}`,)
-    }
-    if (!isEmpty(stack)) {
-      messages.push(formatStack(String(stack), message as string))
+      messages.push(joinLine(blue('[Other]'), SPACE, gray('-'), SPACE, JSON.stringify(other)))
     }
     return messages.join('\n')
   })
+}
+
+class WorkWeiXinTransport extends TransportStream {
+  private cache: Cache
+  private botKey?: string
+  constructor(botKey?: string) {
+    super()
+    this.cache = createCache({ cacheId: 'work-wei-xin-winston' })
+    this.botKey = botKey
+    this.level = 'error'
+  }
+
+  log(info: TransformableInfo, callback: () => void) {
+    setImmediate(() => {
+      this.emit('logged', info)
+    })
+
+    if (!this.botKey) {
+      callback()
+      return
+    }
+
+    this.sendMessage(info)
+      .then(() => {
+        callback()
+      })
+      .catch(() => {
+        callback()
+      })
+  }
+
+  private async sendMessage(info: TransformableInfo) {
+    const { timestamp, context, message, type, method, status, path } = info
+
+    const messages: string[] = []
+    if (isDefined(timestamp)) {
+      messages.push(`时间：${timestamp}`)
+    }
+    if (isDefined(context)) {
+      messages.push(`异常：${context}`)
+    }
+    if (isDefined(message)) {
+      messages.push(`消息：${message}`)
+    }
+    if (isDefined(type)) {
+      messages.push(`类型：${type}`)
+    }
+    if (isDefined(method)) {
+      messages.push(`方法：${method}`)
+    }
+    if (isDefined(status)) {
+      messages.push(`状态：${status}`)
+    }
+    if (isDefined(path)) {
+      messages.push(`路径：${path}`)
+    }
+
+    const key = hash('md5', String(message))
+    const cacheKey = `work-wei-xin-winston:${key}`
+    const cached = await this.cache.get(cacheKey)
+    if (cached) {
+      return
+    }
+    const data = { msgtype: 'text', text: { content: messages.join('\n') } }
+    const body = JSON.stringify(data)
+
+    const url = `https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=${this.botKey}`
+
+    await fetch(url, { method: 'POST', body })
+
+    // 设置缓存三分钟
+    await this.cache.set(cacheKey, true, 180000)
+  }
 }
 
 export function useWinston(): LoggerService {
@@ -153,22 +295,14 @@ export function useWinston(): LoggerService {
     format: format.combine(
       format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
       format.errors({ stack: true }),
-      prettyLog()
+      formatLog()
     ),
     transports: [
       new transports.Console({
         format: format.combine(
-          format.timestamp({
-            format: 'YYYY-MM-DD HH:mm:ss',
-          }),
+          format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
           format.ms(),
-          utilities.format.nestLike('NestJS', {
-            colors: true,
-            prettyPrint: true,
-            processId: true,
-            appName: true,
-          }),
-          prettyPrint('NestJS')
+          consolePrintf(process?.env?.APP_NAME ?? 'Nest')
         ),
       }),
       new transports.DailyRotateFile({
@@ -185,10 +319,7 @@ export function useWinston(): LoggerService {
         filename: '%DATE%.combined', // 日志文件名，占位符为 %DATE%
         datePattern: 'YYYY-MM-DD', // 日期格式
       }),
-      new transports.Http({
-        level: 'warn',
-        format: format.json(),
-      }),
+      new WorkWeiXinTransport(process?.env.WORK_WEI_XIN_WINSTON_BOT_KEY),
     ],
   })
   return logger

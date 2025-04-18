@@ -53,6 +53,7 @@
     "kolorist": "^1.8.0",
     "kysely": "^0.27.6",
     "lodash": "^4.17.21",
+    "logform": "^2.7.0",
     "ms": "3.0.0-canary.1",
     "nest-winston": "^1.10.2",
     "nestjs-cls": "^5.4.2",
@@ -66,7 +67,8 @@
     "sql-formatter": "^15.5.2",
     "ua-parser-js": "^2.0.3",
     "winston": "^3.17.0",
-    "winston-daily-rotate-file": "^5.0.0"
+    "winston-daily-rotate-file": "^5.0.0",
+    "winston-transport": "^4.9.0"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.11.0",
