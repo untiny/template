@@ -13,10 +13,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
   constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
-    const status = this.getStatus(exception)
+    const status = this.getStatus(exception) ?? HttpStatus.INTERNAL_SERVER_ERROR
     const message = this.getMessage(exception)
     const stack = exception instanceof Error ? exception.stack : undefined
-    const context = exception instanceof Error ? exception.constructor.name : undefined
+    const context = exception instanceof Error ? exception.constructor.name : AllExceptionsFilter.name
     const exceptionResponse = new ExceptionResponseDto(message, status, context)
     switch (host.getType()) {
       case 'http':
@@ -89,7 +89,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (params.status >= HttpStatus.INTERNAL_SERVER_ERROR) {
       return Logger.error(optionalParams, stack)
     }
-    Logger.error(optionalParams, stack)
     return Logger.warn(optionalParams)
   }
 
