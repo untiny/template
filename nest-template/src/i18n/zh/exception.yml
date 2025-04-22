@@ -1,0 +1,21 @@
+Bad Gateway: 错误的网关
+Bad Request: 错误的请求
+Conflict: 冲突
+Forbidden: 禁止访问
+Gateway Timeout: 网关超时
+Gone: 已消失
+HTTP Version Not Supported: 不支持的 HTTP 版本
+I'm a teapot: 我是一个茶壶
+Internal Server Error: 内部服务器错误
+Method Not Allowed: 方法不被允许
+Misdirected: 错误的重定向
+Not Acceptable: 不可接受
+Not Found: 未找到
+Not Implemented: 未实现
+Payload Too Large: 负载过大
+Precondition Failed: 先决条件失败
+Request Timeout: 请求超时
+Service Unavailable: 服务不可用
+Unauthorized: 未授权
+Unprocessable Entity: 无法处理的实体
+Unsupported Media Type: 不支持的媒体类型

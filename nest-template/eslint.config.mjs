@@ -25,7 +25,7 @@ export default antfu(
       'no-console': ['warn', { allow: ['warn', 'error'] }],
     },
     ignores: [
-      'prisma/generated/**',
+      'src/generated/**/*',
     ]
   },
 );

@@ -1,4 +1,4 @@
-export const PUBLIC_KEY = Symbol('public')
+export const PUBLIC_KEY = '__public__'
 
 export const AuthStrategy = {
   LOCAL: 'local',

@@ -1,0 +1,16 @@
+message: Hello, World!
+error:
+  not_found: Not Found
+  invalid: Invalid
+  unauthorized: Unauthorized
+  forbidden: Forbidden
+  internal_server_error: Internal Server Error
+  bad_request: Bad Request
+  conflict: Conflict
+  unprocessable_entity: Unprocessable Entity
+  service_unavailable: Service Unavailable
+  gateway_timeout: Gateway Timeout
+  invalid_token: Invalid Token
+  expired_token: Expired Token
+  invalid_credentials: Invalid Credentials
+  user_not_found: User Not Found

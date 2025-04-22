@@ -22,11 +22,11 @@ export class AuthService {
     private readonly configService: ConfigService<Env>,
   ) {
     this.accessJwt = {
-      secret: this.configService.get<string>('JWT_ACCESS_SECRET') as string,
+      secret: this.configService.getOrThrow<string>('JWT_ACCESS_SECRET') as string,
       expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRES_IN', '15m'),
     }
     this.refreshJwt = {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET') as string,
+      secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET') as string,
       expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d'),
     }
   }

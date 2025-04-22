@@ -1,0 +1,21 @@
+Bad Gateway: Bad Gateway
+Bad Request: Bad Request
+Conflict: Conflict
+Forbidden: Forbidden
+Gateway Timeout: Gateway Timeout
+Gone: Gone
+HTTP Version Not Supported: HTTP Version Not Supported
+I'm a teapot: I'm a teapot
+Internal Server Error: Internal Server Error
+Method Not Allowed: Method Not Allowed
+Misdirected: Misdirected
+Not Acceptable: Not Acceptable
+Not Found: Not Found
+Not Implemented: Not Implemented
+Payload Too Large: Payload Too Large
+Precondition Failed: Precondition Failed
+Request Timeout: Request Timeout
+Service Unavailable: Service Unavailable
+Unauthorized: Unauthorized
+Unprocessable Entity: Unprocessable Entity
+Unsupported Media Type: Unsupported Media Type
