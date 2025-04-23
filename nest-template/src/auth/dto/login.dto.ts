@@ -1,12 +1,23 @@
-import { ApiProperty } from '@nestjs/swagger'
-import { IsEmail, IsJWT, IsStrongPassword, MaxLength, MinLength } from 'class-validator'
+import { IsEmail, IsJWT, IsStrongPassword } from 'class-validator'
+import { Property } from 'src/common/decorators'
 
 export class LoginDto {
-  @ApiProperty({ title: 'Email', type: String, example: 'i@ooix.cn' })
+  @Property({
+    i18n: 'module.user.email',
+    title: 'Email',
+    type: String,
+    example: 'i@ooix.cn',
+  })
   @IsEmail()
   email: string
 
-  @ApiProperty({ title: 'Password', type: String, example: 'Password@123456' })
+  @Property({
+    i18n: 'module.user.password',
+    title: 'Password',
+    type: String,
+    example: 'Password@123456',
+    maxLength: 16,
+  })
   @IsStrongPassword({
     minLength: 8,
     minLowercase: 1,
@@ -14,16 +25,15 @@ export class LoginDto {
     minSymbols: 1,
     minUppercase: 1,
   })
-  @MaxLength(16)
   password: string
 }
 
 export class TokenResponseDto {
-  @ApiProperty({ title: 'AccessToken', type: String })
+  @Property({ i18n: 'module.token.access_token', title: 'AccessToken', type: String })
+  @IsJWT()
   access_token: string
 
-  @ApiProperty({ title: 'RefreshToken', type: String })
+  @Property({ i18n: 'module.token.refresh_token', title: 'RefreshToken', type: String })
   @IsJWT()
-  @MinLength(20)
   refresh_token: string
 }

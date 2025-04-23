@@ -48,7 +48,7 @@ export async function useSwagger(app: NestExpressApplication) {
         name: 'Accept-Language',
         in: 'header',
         description: '客户端语言',
-        schema: { type: 'string', enum: languages, example: Language.ZH_CN },
+        schema: { type: 'string', enum: languages, example: Language.ZH },
       },
       {
         name: 'Timezone',

@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiTags, IntersectionType } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import { IsNotEmpty, IsNumber, IsString, ValidateNested } from 'class-validator'
 import { ClsService } from 'nestjs-cls'
@@ -7,10 +7,7 @@ import { AppService } from './app.service'
 import { Property } from './common/decorators'
 
 export class ValidationNestedDto {
-  @Property({ title: {
-    'zh-CN': '字符串',
-    'en-US': 'String',
-  } })
+  @Property({ title: '字符串' })
   @IsString()
   @IsNotEmpty()
   string: string
@@ -28,13 +25,8 @@ export class ValidationDto {
 
   @Property({
     type: ValidationNestedDto,
-    title: {
-      'zh-CN': '对象',
-      'en-US': 'Object',
-    },
+    title: '对象',
   })
-  @Type(() => ValidationNestedDto)
-  @ValidateNested()
   object: ValidationNestedDto
 
   @Property({ type: [ValidationNestedDto], title: '数组' })
@@ -43,6 +35,10 @@ export class ValidationDto {
   array: ValidationNestedDto[]
 }
 
+export class CopyDto extends IntersectionType(
+  ValidationDto,
+) {}
+
 @ApiTags('App')
 @Controller()
 export class AppController {
@@ -50,12 +46,11 @@ export class AppController {
 
   @Get()
   getHello() {
-    return this.cls.get()
     return this.appService.getHello()
   }
 
   @Post('validation')
-  async validation(@Body() body: ValidationDto) {
+  async validation(@Body() body: CopyDto) {
     return body
   }
 }

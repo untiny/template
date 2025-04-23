@@ -1,14 +1,14 @@
 import { HttpStatus } from '@nestjs/common'
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { Property } from '../decorators'
 
 export class ExceptionResponseDto {
-  @ApiProperty({ type: String, example: 'Are you ok?' })
+  @Property({ type: String, example: 'Are you ok?' })
   message: string
 
-  @ApiProperty({ type: Number, enum: HttpStatus, example: HttpStatus.BAD_REQUEST })
+  @Property({ type: Number, enum: HttpStatus, example: HttpStatus.BAD_REQUEST })
   status: HttpStatus
 
-  @ApiPropertyOptional({ type: String, example: 'HttpException' })
+  @Property({ required: false, type: String, example: 'HttpException' })
   context?: string
 
   constructor(message: string, status: HttpStatus, context?: string,) {

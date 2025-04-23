@@ -4,6 +4,7 @@ import { ApiProperty, ApiPropertyOptions } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import { isDefined, IsEnum, IsIn, IsOptional, Length, Max, MaxLength, Min, MinLength, ValidateNested, ValidationOptions } from 'class-validator'
 import { isArray, isObject } from 'lodash'
+import { I18nPath } from 'src/generated/i18n'
 
 function getTypeIsArrayTuple(
   input: Function | [Function] | undefined | string | Record<string, any>,
@@ -20,20 +21,14 @@ function getTypeIsArrayTuple(
   return [type as Function, isInputArray]
 }
 
-export type PropertyOptions = Omit<ApiPropertyOptions, 'title'> & {
-  'x-i18n-title'?: Record<Language, string>
-  'title'?: string | Record<Language, string>
+export type PropertyOptions = ApiPropertyOptions & {
+  i18n?: I18nPath
 }
 
 export function Property(options?: PropertyOptions) {
   options = options ?? {}
 
-  if (typeof options.title === 'object') {
-    options['x-i18n-title'] = options.title
-    options.title = options['x-i18n-title']['zh-cn']
-  }
-
-  const decorators = [ApiProperty(options as ApiPropertyOptions)]
+  const decorators: PropertyDecorator[] = [ApiProperty(options)]
 
   const validationOptions: ValidationOptions = {}
 
@@ -44,7 +39,15 @@ export function Property(options?: PropertyOptions) {
     validationOptions.each = true
   }
 
-  if (typeof type === 'function') {
+  if (
+    typeof type === 'function'
+    && type.name !== 'Object'
+    && type.name !== 'Array'
+    && type.name !== 'Number'
+    && type.name !== 'String'
+    && type.name !== 'Boolean'
+    && type.name !== 'BigInt'
+  ) {
     decorators.push(
       Type(() => type),
       ValidateNested({ ...validationOptions })

@@ -1,12 +1,7 @@
-message: 你好，世界！
-error:
-  not_found: 找不到
-  invalid: 无效
-  unauthorized: 未授权
-  forbidden: 禁止访问
-  internal_server_error: 内部服务器错误
-  bad_request: 错误请求
-  conflict: 冲突
-  unprocessable_entity: 无法处理的实体
-  service_unavailable: 服务不可用
-  gateway_timeout: 网关超时
+user:
+  name: 用户名
+  password: 密码
+  email: 邮箱
+token: 
+  access_token: 访问令牌
+  refresh_token: 刷新令牌

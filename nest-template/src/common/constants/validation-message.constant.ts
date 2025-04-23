@@ -207,7 +207,7 @@ export const DefaultValidationMessage = {
   isJson: (options: ValidationMessageArguments): string => {
     return `${options.each ? 'each value in ' : ''}$property must be a valid json string`
   },
-  isJWT: (options: ValidationMessageArguments): string => {
+  isJwt: (options: ValidationMessageArguments): string => {
     return `${options.each ? 'each value in ' : ''}$property must be a jwt string`
   },
   isLocale: (options: ValidationMessageArguments): string => {
@@ -348,12 +348,12 @@ export const ValidationMessage: Record<Language, ValidationMessageMap> = {
   /**
    * 英语
    */
-  'en-US': DefaultValidationMessage,
+  [Language.EN]: DefaultValidationMessage,
 
   /**
    * 简体中文
    */
-  'zh-CN': {
+  [Language.ZH]: {
     arrayContains: (options: ValidationMessageArguments): string => {
       return `$property${options.each ? '中的每个值' : ''}必须包含 $constraint1 个值`
     },
@@ -551,7 +551,7 @@ export const ValidationMessage: Record<Language, ValidationMessageMap> = {
     isJson: (options: ValidationMessageArguments): string => {
       return `$property${options.each ? '中的每个值' : ''}必须是有效的 json 字符串`
     },
-    isJWT: (options: ValidationMessageArguments): string => {
+    isJwt: (options: ValidationMessageArguments): string => {
       return `$property${options.each ? '中的每个值' : ''}必须是 jwt 字符串`
     },
     isLocale: (options: ValidationMessageArguments): string => {

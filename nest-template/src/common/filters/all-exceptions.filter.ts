@@ -16,7 +16,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
     const i18n = getI18nContext(host)
     const status = this.getStatus(exception) ?? HttpStatus.INTERNAL_SERVER_ERROR
-    const message = formatI18nException(this.getMessage(exception), i18n!)
+    const message = formatI18nException(this.getMessage(exception), i18n!) as string
     const stack = exception instanceof Error ? exception.stack : undefined
     const context = exception instanceof Error ? exception.constructor.name : AllExceptionsFilter.name
     const exceptionResponse = new ExceptionResponseDto(message, status, context)
@@ -99,9 +99,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (typeof exception === 'string') {
       message = exception
     }
-    // else if (exception instanceof ValidationException) {
-    //   message = formatValidationErrorMessage(exception.errors, this.cls.get('language'))
-    // }
     else if (exception instanceof HttpException) {
       const error = exception.getResponse()
       if (typeof error === 'string') {
@@ -147,7 +144,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (isArray(message)) {
       message = message.join('\n')
     }
-    return message ?? 'unknown error'
+    return message ?? 'Unknown error'
   }
 
   getStack(exception: unknown): string | undefined {

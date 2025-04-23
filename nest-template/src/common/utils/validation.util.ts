@@ -122,7 +122,7 @@ function replaceMessageSpecialTokens(
   return messageString
 }
 
-function formatValidationErrors(validationErrors: ValidationError[], language: Language = Language.ZH_CN) {
+function formatValidationErrors(validationErrors: ValidationError[], language: Language = Language.ZH) {
   return validationErrors.map((error) => {
     if (error.children && error.children.length > 0) {
       error.children = formatValidationErrors(error.children, language)
@@ -160,7 +160,7 @@ function formatValidationErrors(validationErrors: ValidationError[], language: L
         }
         const buildMessage = getValidationBuildMessage(language, key as ValidationMethod)
         if (!buildMessage) {
-          Logger.warn(`未找到 ${key} 的错误消息`, 'ValidationPipe')
+          Logger.warn(`未找到 ${language}.${key} 的错误消息`, 'ValidationPipe')
           continue
         }
         const message = buildMessage(args) as string
@@ -171,7 +171,7 @@ function formatValidationErrors(validationErrors: ValidationError[], language: L
   })
 }
 
-export function formatValidationErrorMessage(errors: ValidationError[], language: Language = Language.ZH_CN): string {
+export function formatValidationErrorMessage(errors: ValidationError[], language: Language = Language.ZH): string {
   errors = formatValidationErrors(errors, language)
   const formattedErrors = flattenValidationErrors(errors)
   const message = formattedErrors.join('\n') || 'Validation failed'

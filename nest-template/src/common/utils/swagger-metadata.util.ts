@@ -1,6 +1,7 @@
 import { ApiPropertyOptions } from '@nestjs/swagger'
 import { PropertyOptions } from '../decorators'
 import { Language } from '../enums/language.enum'
+import { $t } from './i18n.util'
 
 export function getApiPropertyOptions(
   target: object,
@@ -12,12 +13,14 @@ export function getApiPropertyOptions(
 export function getPropertyTitle(
   target: object,
   property: string,
-  language: Language = Language.ZH_CN,
+  language: Language = Language.ZH,
 ) {
   const propertyOptions = getApiPropertyOptions(target, property) as PropertyOptions
-  if (!propertyOptions) {
-    return null
+  if (!propertyOptions || !propertyOptions?.i18n) {
+    return propertyOptions?.title ?? null
   }
-  const title = propertyOptions['x-i18n-title']?.[language] ?? propertyOptions.title as string
-  return title
+  return $t(propertyOptions.i18n, {
+    lang: language,
+    defaultValue: propertyOptions.title ?? propertyOptions.i18n,
+  })
 }

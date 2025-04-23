@@ -6,7 +6,7 @@ declare global {
   }
 
   /** 语言设定 */
-  type Language = 'zh-CN' | 'en-US'
+  type Language = 'zh' | 'en'
 }
 
 declare module 'nestjs-cls' {

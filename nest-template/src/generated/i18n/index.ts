@@ -27,24 +27,17 @@ export type I18nTranslations = {
         "Unauthorized": string;
         "Unprocessable Entity": string;
         "Unsupported Media Type": string;
+        "Unknown error": string;
     };
     "module": {
-        "message": string;
-        "error": {
-            "not_found": string;
-            "invalid": string;
-            "unauthorized": string;
-            "forbidden": string;
-            "internal_server_error": string;
-            "bad_request": string;
-            "conflict": string;
-            "unprocessable_entity": string;
-            "service_unavailable": string;
-            "gateway_timeout": string;
-            "invalid_token": string;
-            "expired_token": string;
-            "invalid_credentials": string;
-            "user_not_found": string;
+        "user": {
+            "name": string;
+            "password": string;
+            "email": string;
+        };
+        "token": {
+            "access_token": string;
+            "refresh_token": string;
         };
     };
 };
