@@ -1,0 +1,37 @@
+{
+  "name": "openapi",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix"
+  },
+  "dependencies": {
+    "@scalar/openapi-parser": "^0.10.17",
+    "@scalar/openapi-types": "^0.2.2",
+    "@tailwindcss/vite": "^4.1.5",
+    "@vueuse/core": "^13.1.0",
+    "pinia": "^3.0.2",
+    "tailwindcss": "^4.1.5",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^4.13.0",
+    "@vicons/carbon": "^0.13.0",
+    "@vitejs/plugin-vue": "^5.2.3",
+    "@vue/tsconfig": "^0.7.0",
+    "eslint": "^9.26.0",
+    "naive-ui": "^2.41.0",
+    "typescript": "~5.8.3",
+    "unplugin-auto-import": "^19.2.0",
+    "unplugin-vue-components": "^28.5.0",
+    "vfonts": "^0.0.3",
+    "vite": "^6.3.5",
+    "vue-tsc": "^2.2.8"
+  }
+}

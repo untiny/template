@@ -1,0 +1,6 @@
+
+@import "tailwindcss";
+
+.n-menu-item-content-header {
+  @apply flex items-center justify-between;
+}
