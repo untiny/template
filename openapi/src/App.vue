@@ -1,96 +1,133 @@
 <script setup lang="ts">
 import type { OpenAPI } from '@scalar/openapi-types'
-import type { GlobalTheme, MenuGroupOption, MenuOption } from 'naive-ui'
+import type { GlobalTheme, MenuGroupOption, MenuInst, MenuOption } from 'naive-ui'
 import { Search } from '@vicons/carbon'
-import { processDocument } from './utils/process-document'
+import { isEmpty } from 'lodash'
+import { NEllipsis } from 'naive-ui'
+import { RouterLink } from 'vue-router'
+import { useSwagger } from './store/use-swagger'
+
+const { document, isReady } = useSwagger('http://local-dev.58mhg.com:3090/api-docs-json')
 
 const theme = ref<GlobalTheme | null>(null)
 
 const keyword = ref<string>('')
 
-function renderExtra(option: MenuOption | MenuGroupOption) {
+function renderLabel(option: MenuOption | MenuGroupOption | OperationMenuOption) {
   const classes = [
+    'ml-3',
     'font-mono',
     'font-medium',
     'ms-auto',
     'text-xs',
     'text-nowrap',
   ]
-  if (option.extra === 'POST') {
-    classes.push('text-blue-600', 'dark:text-blue-400')
+
+  const methodClasses: Record<Lowercase<OpenAPI.HttpMethod>, string> = {
+    get: 'text-green-600 dark:text-green-400',
+    delete: 'text-red-600 dark:text-red-400',
+    head: 'text-gray-600 dark:text-gray-400',
+    options: 'text-orange-600 dark:text-orange-400',
+    patch: 'text-purple-600 dark:text-purple-400',
+    post: 'text-blue-600 dark:text-blue-400',
+    put: 'text-yellow-600 dark:text-yellow-400',
+    trace: 'text-cyan-600 dark:text-cyan-400',
   }
-  else if (option.extra === 'DELETE') {
-    classes.push('text-red-600', 'dark:text-red-400')
+
+  if (option.method) {
+    classes.push(methodClasses[option.method as Lowercase<OpenAPI.HttpMethod>])
   }
-  else if (option.extra === 'PUT') {
-    classes.push('text-yellow-600', 'dark:text-yellow-400')
-  }
-  else if (option.extra === 'GET') {
-    classes.push('text-green-600', 'dark:text-green-400')
-  }
-  else if (option.extra === 'PATCH') {
-    classes.push('text-purple-600', 'dark:text-purple-400')
-  }
-  else if (option.extra === 'HEAD') {
-    classes.push('text-gray-600', 'dark:text-gray-400')
-  }
-  else if (option.extra === 'OPTIONS') {
-    classes.push('text-orange-600', 'dark:text-orange-400')
-  }
-  else if (option.extra === 'CONNECT') {
-    classes.push('text-pink-600', 'dark:text-pink-400')
-  }
-  else if (option.extra === 'TRACE') {
-    classes.push('text-cyan-600', 'dark:text-cyan-400')
-  }
-  else {
-    classes.push('text-gray-600', 'dark:text-gray-400')
+
+  const label = h(
+    NEllipsis,
+    null,
+    { default: () => option.label as string },
+  )
+  const method = option.method
+    ? h(
+        'div',
+        { class: classes.join(' ') },
+        String(option.method).toLocaleUpperCase(),
+      )
+    : null
+  const div = h(
+    'div',
+    { class: 'flex items-center justify-between' },
+    [label, method],
+  )
+  if (!option.key?.toString().startsWith('/')) {
+    return div
   }
   return h(
-    'span',
-    { class: classes.join(' ') },
-    option.extra,
+    RouterLink,
+    { to: { path: option.key as string } },
+    { default: () => div },
   )
 }
 
-function handleUpdateValue(key: string, item: MenuOption) {
-  console.log(key, item)
+type OperationMenuOption = MenuOption & {
+  label?: string
+  method?: string
+  path?: string
+  tags?: string[]
+  href?: string
 }
 
-const document = ref<OpenAPI.Document>()
-
-onMounted(async () => {
-  const result = await processDocument('http://local-dev.58mhg.com:3090/api-docs-json')
-  document.value = result.document
-  console.log(result.document)
-
-  // const options = result.document.tags?
+const operations = computed(() => {
+  const options: OperationMenuOption[] = []
+  for (const path in document.value?.paths) {
+    const pathItem = document.value?.paths[path]
+    Object.entries(pathItem!).forEach(([method, operation]) => {
+      options.push({
+        label: operation.summary ?? path,
+        method,
+        path,
+        tags: operation.tags,
+        key: `/operation/${operation.operationId}`,
+      })
+    })
+  }
+  return options
 })
 
-const menuOptions: MenuOption[] = [
-  { label: 'Introduction', key: 'introduction' },
-  {
-    label: '用户管理',
-    key: 'users',
-    children: [
-      {
-        label: '创建用户',
-        key: 'createUser',
-        extra: 'POST',
-      },
-      {
-        label: '获取用户列表',
-        key: 'getUsers',
-        extra: 'GET',
-      },
-      {
-        label: '删除用户',
-        key: 'deleteUser',
-        extra: 'DELETE',
-      },
-    ],
-  },
-]
+const menuOptions = computed(() => {
+  if (!isEmpty(keyword.value)) {
+    return operations.value.filter((operation) => {
+      return operation.label?.includes(keyword.value) || operation.path?.includes(keyword.value)
+    })
+  }
+  const options: MenuOption[] = [
+    {
+      label: 'Introduction',
+      key: '/',
+    },
+  ]
+  const tagGroups: Map<string, OperationMenuOption[]> = new Map()
+  operations.value.forEach((operation) => {
+    operation.tags?.forEach((tag) => {
+      if (!tagGroups.has(tag)) {
+        tagGroups.set(tag, [])
+      }
+      tagGroups.get(tag)?.push(operation)
+    })
+  })
+  tagGroups.forEach((operations, tag) => {
+    options.push({
+      label: tag,
+      key: tag,
+      children: operations,
+    })
+  })
+  return options
+})
+
+const selectedKeyRef = ref<string>(window.location.hash?.replace('#', '') || '/')
+const menuInstRef = ref<MenuInst | null>(null)
+
+watch(isReady, async () => {
+  await nextTick()
+  menuInstRef.value?.showOption(selectedKeyRef.value)
+})
 </script>
 
 <template>
@@ -104,7 +141,14 @@ const menuOptions: MenuOption[] = [
             </template>
           </n-input>
         </div>
-        <n-menu class="select-none" :options="menuOptions" :indent="16" default-value="introduction" :render-extra="renderExtra" @update:value="handleUpdateValue" />
+        <n-menu
+          ref="menuInstRef"
+          v-model:value="selectedKeyRef"
+          class="select-none"
+          :options="menuOptions"
+          :indent="16"
+          :render-label="renderLabel"
+        />
       </n-layout-sider>
       <n-layout-content content-class="p-8">
         <RouterView />

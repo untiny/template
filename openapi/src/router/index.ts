@@ -3,8 +3,8 @@ import Operation from '@/views/Operation.vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 
 const routes = [
-  { path: '/', component: Introduction },
-  { path: '/operation/:path+', component: Operation },
+  { name: 'Introduction', path: '/', component: Introduction },
+  { name: 'Operation', path: '/operation/:operationId', component: Operation },
 ]
 
 const router = createRouter({

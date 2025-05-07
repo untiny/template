@@ -3,6 +3,11 @@
   "type": "module",
   "version": "0.0.0",
   "private": true,
+  "packageManager": "pnpm@10.9.0",
+  "keywords": [
+    "openapi",
+    "swagger"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
@@ -15,6 +20,8 @@
     "@scalar/openapi-types": "^0.2.2",
     "@tailwindcss/vite": "^4.1.5",
     "@vueuse/core": "^13.1.0",
+    "@vueuse/router": "^13.1.0",
+    "lodash": "^4.17.21",
     "pinia": "^3.0.2",
     "tailwindcss": "^4.1.5",
     "vue": "^3.5.13",
@@ -22,6 +29,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.13.0",
+    "@types/lodash": "^4.17.16",
     "@vicons/carbon": "^0.13.0",
     "@vitejs/plugin-vue": "^5.2.3",
     "@vue/tsconfig": "^0.7.0",
