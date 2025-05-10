@@ -1,3 +1,28 @@
+<script lang="ts" setup>
+import viteIcon from '@/assets/vite.svg'
+import vueIcon from '@/assets/vue.svg'
+import { Capacitor, CapacitorHttp } from '@capacitor/core'
+import { useQRCode } from '@vueuse/integrations/useQRCode'
+
+const ip = ref('123')
+const text = ref('text-to-encode')
+const qrcode = useQRCode(text, { margin: 0 })
+
+const platform = Capacitor.getPlatform()
+
+async function test() {
+  try {
+    const res = await CapacitorHttp.get({
+      url: 'http://192.168.10.170:5173/',
+    })
+    console.log('什么滴家伙', JSON.stringify(res))
+  }
+  catch (error) {
+    console.log('错误', JSON.stringify(error))
+  }
+}
+</script>
+
 <template>
   <ion-page>
     <ion-header class="ion-no-border" translucent>
@@ -25,13 +50,17 @@
               --padding-end: 1rem;
             "
           >
-            <div slot="end">
-              <ion-button size="small" @click="test">OK</ion-button>
-            </div>
+            <template #end>
+              <div>
+                <ion-button size="small" @click="test">
+                  OK
+                </ion-button>
+              </div>
+            </template>
           </ion-input>
         </div>
         <div class="bg-white rounded-2xl p-4 col-span-2 row-span-2">
-          <img :src="qrcode" class="w-full flex" />
+          <img :src="qrcode" class="w-full flex">
         </div>
         <ion-button
           size="large"
@@ -39,7 +68,9 @@
           mode="ios"
           color="tertiary"
         >
-          <ion-icon slot="start" :icon="viteIcon"></ion-icon>
+          <template #start>
+            <ion-icon :icon="viteIcon" />
+          </template>
           <span>Untiny</span>
         </ion-button>
         <ion-button
@@ -48,49 +79,32 @@
           mode="ios"
           color="warning"
         >
-          <ion-icon slot="start" :icon="vueIcon"></ion-icon>
+          <template #start>
+            <ion-icon :icon="vueIcon" />
+          </template>
           <span>Untiny</span>
         </ion-button>
         <div class="bg-white rounded-2xl py-4 col-span-4">
           <ion-item lines="none" mode="ios">
             <ion-label>platform</ion-label>
-            <ion-note slot="end">{{ platform }}</ion-note>
+            <template #end>
+              <ion-note>{{ platform }}</ion-note>
+            </template>
           </ion-item>
           <ion-item lines="none" mode="ios">
             <ion-label>Label</ion-label>
-            <ion-note slot="end">Value</ion-note>
+            <template #end>
+              <ion-note>Value</ion-note>
+            </template>
           </ion-item>
           <ion-item lines="none" mode="ios">
             <ion-label>Label</ion-label>
-            <ion-note slot="end">Value</ion-note>
+            <template #end>
+              <ion-note>Value</ion-note>
+            </template>
           </ion-item>
         </div>
       </div>
     </ion-content>
   </ion-page>
 </template>
-
-<script lang="ts" setup>
-import { useQRCode } from "@vueuse/integrations/useQRCode";
-import vueIcon from "@/assets/vue.svg";
-import viteIcon from "@/assets/vite.svg";
-import { Capacitor, CapacitorHttp } from "@capacitor/core";
-
-const ip = ref("123");
-const text = ref("text-to-encode");
-const qrcode = useQRCode(text, { margin: 0 });
-
-const platform = Capacitor.getPlatform();
-
-const test = async () => {
-try {
-  const res = await CapacitorHttp.get({
-    url: "http://192.168.10.170:5173/",
-  });
-  console.log("什么滴家伙", JSON.stringify(res));
-} catch (error) {
-  console.log("错误", JSON.stringify(error));
-  
-}
-};
-</script>

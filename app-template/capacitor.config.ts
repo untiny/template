@@ -1,11 +1,11 @@
 /// <reference types="@capacitor/keyboard" />
-import type { CapacitorConfig } from "@capacitor/cli";
-import { KeyboardResize } from "@capacitor/keyboard";
+import type { CapacitorConfig } from '@capacitor/cli'
+import { KeyboardResize } from '@capacitor/keyboard'
 
 const config: CapacitorConfig = {
-  appId: "com.example.app",
-  appName: "app-template",
-  webDir: "dist",
+  appId: 'com.example.app',
+  appName: 'app-template',
+  webDir: 'dist',
   plugins: {
     CapacitorHttp: {
       enabled: true,
@@ -16,8 +16,8 @@ const config: CapacitorConfig = {
     },
   },
   server: {
-    androidScheme: "http",
-  }
-};
+    androidScheme: 'http',
+  },
+}
 
-export default config;
+export default config
