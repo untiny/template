@@ -1,5 +1,4 @@
 import type { NestExpressApplication } from '@nestjs/platform-express'
-import { join } from 'node:path'
 import { Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
@@ -18,18 +17,6 @@ async function bootstrap() {
   const port = configService.get<number>('APP_PORT', 3000)
 
   app.enableShutdownHooks()
-  app.engine('vue', (filePath: string, options: unknown, callback: (error: Error | null, html?: string) => void) => {
-    try {
-      console.log(filePath, options)
-
-      callback(null, '123')
-    }
-    catch (error) {
-      callback(error as Error)
-    }
-  })
-  app.setViewEngine('vue')
-  app.setBaseViewsDir(join(__dirname, '..', 'views'))
 
   await useSwagger(app)
 

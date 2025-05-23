@@ -68,7 +68,6 @@
     "socket.io": "^4.8.1",
     "sql-formatter": "^15.5.2",
     "ua-parser-js": "^2.0.3",
-    "vue": "^3.5.14",
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0",
     "winston-transport": "^4.9.0"
