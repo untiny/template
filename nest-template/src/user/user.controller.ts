@@ -1,5 +1,5 @@
 import { Controller, Get, Param, ParseIntPipe, Query, UseGuards } from '@nestjs/common'
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
 import { AuthUser } from 'src/auth/decorators'
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard'
 import { CursorPaginationDto } from 'src/common/dto/pagination.dto'
@@ -26,6 +26,7 @@ export class UserController {
 
   @Get(':id')
   @ApiOperation({ summary: '获取用户信息' })
+  @ApiParam({ name: 'id', type: 'integer', description: '用户ID' })
   async getUser(@Param('id', ParseIntPipe) id: number) {
     return await this.userService.getUser(id)
   }

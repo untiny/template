@@ -1,4 +1,4 @@
-import { IsEmail, IsJWT, IsStrongPassword } from 'class-validator'
+import { IsEmail, IsJWT, IsStrongPassword, MaxLength } from 'class-validator'
 import { Property } from 'src/common/decorators'
 
 export class LoginDto {
@@ -7,6 +7,7 @@ export class LoginDto {
     title: 'Email',
     type: String,
     example: 'i@ooix.cn',
+    format: 'email',
   })
   @IsEmail()
   email: string
@@ -16,7 +17,9 @@ export class LoginDto {
     title: 'Password',
     type: String,
     example: 'Password@123456',
+    minLength: 8,
     maxLength: 16,
+    format: 'password',
   })
   @IsStrongPassword({
     minLength: 8,
@@ -25,6 +28,7 @@ export class LoginDto {
     minSymbols: 1,
     minUppercase: 1,
   })
+  @MaxLength(16)
   password: string
 }
 

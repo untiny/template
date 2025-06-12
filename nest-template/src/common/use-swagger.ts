@@ -26,6 +26,8 @@ class ScalarModule {
         targetKey: 'node',
         clientKey: 'ofetch',
       },
+      persistAuth: true,
+      defaultOpenAllTags: false,
     }))
   }
 }
@@ -48,21 +50,37 @@ export async function useSwagger(app: NestExpressApplication) {
         name: 'Accept-Language',
         in: 'header',
         description: '客户端语言',
-        schema: { type: 'string', enum: languages, example: Language.ZH },
+        schema: {
+          'type': 'string',
+          'enum': languages,
+          'example': Language.ZH,
+          // eslint-disable-next-line ts/ban-ts-comment
+          // @ts-ignore
+          'x-enumDescriptions': {
+            [Language.ZH]: '简体中文',
+            [Language.EN]: '英语',
+          },
+        },
       },
       {
         name: 'Timezone',
         in: 'header',
         description: '客户端时区',
         schema: {
-          type: 'string',
-          enum: [
+          'type': 'string',
+          'enum': [
             'Asia/Shanghai',
             'Asia/Hong_Kong',
             'America/New_York',
             'Etc/Universal',
           ],
-          example: 'Asia/Shanghai',
+          'example': 'Asia/Shanghai',
+          'x-enumDescriptions': {
+            'Asia/Shanghai': '[上海时间](https://utctime.info/timezone/Asia--Shanghai/)',
+            'Asia/Hong_Kong': '[香港时间](https://utctime.info/timezone/Asia--Hong_Kong/)',
+            'America/New_York': '[纽约时间](https://utctime.info/timezone/America--New_York/)',
+            'Etc/Universal': '[通用时区](https://utctime.info/timezone/Etc--Universal/)',
+          },
         },
       },
     )
