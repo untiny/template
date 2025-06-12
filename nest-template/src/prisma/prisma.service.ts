@@ -44,7 +44,7 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Pris
 
     super({ log })
 
-    this.enableDebug = this.configService.get<string>('SQL_DEBUG') === 'true'
+    this.enableDebug = this.configService.get<string>('SQL_DEBUG', 'false') === 'true'
 
     this.$on('query', event => this.handleQuery(event))
     this.$on('info', event => this.handleInfo(event))
