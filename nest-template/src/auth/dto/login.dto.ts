@@ -1,4 +1,4 @@
-import { IsEmail, IsJWT, IsStrongPassword, MaxLength } from 'class-validator'
+import { IsEmail, IsJWT, IsStrongPassword } from 'class-validator'
 import { Property } from 'src/common/decorators'
 
 export class LoginDto {
@@ -28,16 +28,15 @@ export class LoginDto {
     minSymbols: 1,
     minUppercase: 1,
   })
-  @MaxLength(16)
   password: string
 }
 
 export class TokenResponseDto {
-  @Property({ i18n: 'module.token.access_token', title: 'AccessToken', type: String })
+  @Property({ i18n: 'module.token.access_token', title: 'AccessToken', type: String, format: 'jwt' })
   @IsJWT()
   access_token: string
 
-  @Property({ i18n: 'module.token.refresh_token', title: 'RefreshToken', type: String })
+  @Property({ i18n: 'module.token.refresh_token', title: 'RefreshToken', type: String, format: 'jwt' })
   @IsJWT()
   refresh_token: string
 }
