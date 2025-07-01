@@ -13,6 +13,7 @@ import { setupCls } from './common/setup-cls'
 import { PrismaModule } from './prisma/prisma.module'
 import { SharedModule } from './shared/shared.module'
 import { UserModule } from './user/user.module'
+import { SocketModule } from './socket/socket.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { UserModule } from './user/user.module'
     SharedModule,
     AuthModule,
     UserModule,
+    SocketModule,
   ],
   controllers: [AppController],
   providers: [
