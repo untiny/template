@@ -34,7 +34,7 @@
 
   const cluster = new Map();
 
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 15; i++) {
     const socket = createSocket(`client-${i}`);
     cluster.set(socket.id, socket);
   }
