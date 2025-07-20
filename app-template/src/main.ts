@@ -1,5 +1,6 @@
+import { Capacitor } from '@capacitor/core'
 import { IonicVue } from '@ionic/vue'
-// import { SafeArea } from "@untiny/capacitor-safe-area";
+import { SafeArea } from '@untiny/capacitor-safe-area'
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
@@ -16,22 +17,21 @@ import '@ionic/vue/css/text-transformation.css'
 import '@ionic/vue/css/typography.css'
 import './style.css'
 
-// async function injectSafeAreaVariables() {
-//   if (!Capacitor.isNativePlatform())
-//     return
-//   try {
-//     const safeArea = await SafeArea.getSafeArea()
-//     Object.entries(safeArea).forEach(([key, value]) => {
-//       document.documentElement.style.setProperty(
-//         `--ion-safe-area-${key}`,
-//         `${value}px`
-//       );
-//     });
-//   } catch (error) {}
-// }
+async function injectSafeAreaVariables() {
+  if (!Capacitor.isNativePlatform()) {
+    return
+  }
+  const safeArea = await SafeArea.getSafeArea()
+  Object.entries(safeArea).forEach(([key, value]) => {
+    document.documentElement.style.setProperty(
+      `--ion-safe-area-${key}`,
+      `${value}px`,
+    )
+  })
+}
 
 async function bootstrap() {
-  // await injectSafeAreaVariables()
+  await injectSafeAreaVariables()
 
   const app = createApp(App)
   const pinia = createPinia()
