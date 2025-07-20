@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import viteIcon from '@/assets/vite.svg'
-import vueIcon from '@/assets/vue.svg'
 import { Capacitor, CapacitorHttp } from '@capacitor/core'
 import { useQRCode } from '@vueuse/integrations/useQRCode'
+import viteIcon from '@/assets/vite.svg'
+import vueIcon from '@/assets/vue.svg'
 
 const ip = ref('123')
 const text = ref('text-to-encode')
@@ -39,8 +39,8 @@ async function test() {
             enterkeyhint="enter"
             fill="solid"
             inputmode="numeric"
-            minlength="7"
-            maxlength="15"
+            :minlength="7"
+            :maxlength="15"
             type="text"
             mode="ios"
             style="
