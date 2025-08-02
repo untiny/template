@@ -3,10 +3,27 @@ import type { NestExpressApplication } from '@nestjs/platform-express'
 import type { OpenAPIObject } from '@nestjs/swagger'
 import type { Request, Response } from 'express'
 import { ConfigService } from '@nestjs/config'
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { DocumentBuilder, getSchemaPath, SwaggerModule } from '@nestjs/swagger'
 import { apiReference } from '@scalar/nestjs-api-reference'
 import { Env } from 'src/generated/env'
-import { Language, languages } from './enums/language.enum'
+import { OpenAPISchema } from './utils'
+
+OpenAPISchema.set('TimezoneEnum', {
+  'type': 'string',
+  'enum': [
+    'Asia/Shanghai',
+    'Asia/Hong_Kong',
+    'America/New_York',
+    'Etc/Universal',
+  ],
+  'example': 'Asia/Shanghai',
+  'x-enumDescriptions': {
+    'Asia/Shanghai': '[上海时间](https://utctime.info/timezone/Asia--Shanghai/)',
+    'Asia/Hong_Kong': '[香港时间](https://utctime.info/timezone/Asia--Hong_Kong/)',
+    'America/New_York': '[纽约时间](https://utctime.info/timezone/America--New_York/)',
+    'Etc/Universal': '[通用时区](https://utctime.info/timezone/Etc--Universal/)',
+  },
+})
 
 class ScalarModule {
   static setup(path: string, app: INestApplication, document: OpenAPIObject, metaData?: { title?: string, description?: string }) {
@@ -51,15 +68,7 @@ export async function useSwagger(app: NestExpressApplication) {
         in: 'header',
         description: '客户端语言',
         schema: {
-          'type': 'string',
-          'enum': languages,
-          'example': Language.ZH,
-          // eslint-disable-next-line ts/ban-ts-comment
-          // @ts-ignore
-          'x-enumDescriptions': {
-            [Language.ZH]: '简体中文',
-            [Language.EN]: '英语',
-          },
+          $ref: getSchemaPath('LanguageEnum'),
         },
       },
       {
@@ -67,26 +76,15 @@ export async function useSwagger(app: NestExpressApplication) {
         in: 'header',
         description: '客户端时区',
         schema: {
-          'type': 'string',
-          'enum': [
-            'Asia/Shanghai',
-            'Asia/Hong_Kong',
-            'America/New_York',
-            'Etc/Universal',
-          ],
-          'example': 'Asia/Shanghai',
-          'x-enumDescriptions': {
-            'Asia/Shanghai': '[上海时间](https://utctime.info/timezone/Asia--Shanghai/)',
-            'Asia/Hong_Kong': '[香港时间](https://utctime.info/timezone/Asia--Hong_Kong/)',
-            'America/New_York': '[纽约时间](https://utctime.info/timezone/America--New_York/)',
-            'Etc/Universal': '[通用时区](https://utctime.info/timezone/Etc--Universal/)',
-          },
+          $ref: getSchemaPath('TimezoneEnum'),
         },
       },
     )
     .build()
 
   const document = SwaggerModule.createDocument(app, config)
+
+  OpenAPISchema.buildDocument(document)
 
   if (template === 'swagger') {
     SwaggerModule.setup(path, app, document, {
