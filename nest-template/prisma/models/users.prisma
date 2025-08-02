@@ -1,0 +1,17 @@
+model User {
+  id          Int      @id @default(autoincrement())
+  /// 创建时间
+  create_time DateTime @default(now())
+  /// 更新时间
+  update_time DateTime @updatedAt
+  /// 邮箱
+  email       String   @unique
+  /// 用户名
+  name        String   @db.VarChar(30)
+  /// 头像
+  avatar      String?
+  /// 密码
+  password    String
+
+  @@map("users")
+}

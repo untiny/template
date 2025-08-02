@@ -1,5 +1,5 @@
-type ReplaceDashWithUnderscore<S extends string> =
-  S extends `${infer Prefix}-${infer Suffix}`
+type ReplaceDashWithUnderscore<S extends string>
+  = S extends `${infer Prefix}-${infer Suffix}`
     ? `${Prefix}_${ReplaceDashWithUnderscore<Suffix>}`
     : S
 

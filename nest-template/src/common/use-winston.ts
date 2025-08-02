@@ -8,7 +8,7 @@ import { isEmpty } from 'lodash'
 import { TransformableInfo } from 'logform'
 import { WinstonModule } from 'nest-winston'
 import { format, transports } from 'winston'
-import * as TransportStream from 'winston-transport'
+import TransportStream from 'winston-transport'
 import 'winston-daily-rotate-file'
 
 const SPACE = ' '

@@ -17,14 +17,14 @@ async function bootstrap() {
 
   app.useStaticAssets(join(__dirname, '..', 'public'))
 
-  const socketAdapter = new SocketAdapter(app)
-  await socketAdapter.connectToRedis()
-  app.useWebSocketAdapter(socketAdapter)
-
   const configService = app.get<ConfigService<Env>>(ConfigService)
   const port = configService.get<number>('APP_PORT', 3000)
 
   app.enableShutdownHooks()
+
+  const socketAdapter = new SocketAdapter(app)
+  await socketAdapter.connectToRedis(configService)
+  app.useWebSocketAdapter(socketAdapter)
 
   await useSwagger(app)
 

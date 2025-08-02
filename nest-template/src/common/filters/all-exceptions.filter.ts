@@ -2,10 +2,10 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logge
 import { HttpAdapterHost } from '@nestjs/core'
 import { RpcException } from '@nestjs/microservices'
 import { WsException } from '@nestjs/websockets'
-import { Prisma } from '@prisma/client'
 import { isArray, isObject } from 'lodash'
 import { throwError } from 'rxjs'
 import { Socket } from 'socket.io'
+import { Prisma } from 'src/generated/prisma/client'
 import { ExceptionResponseDto } from '../dto/exception-response.dto'
 import { formatI18nException, getI18nContext } from '../utils'
 

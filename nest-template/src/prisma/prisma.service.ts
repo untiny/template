@@ -1,31 +1,15 @@
 import { INestApplication, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { Prisma, PrismaClient } from '@prisma/client'
 import consola from 'consola'
 import { blue, green } from 'kolorist'
-import { Kysely, MysqlAdapter, MysqlIntrospector, MysqlQueryCompiler } from 'kysely'
-import prismaExtensionKysely from 'prisma-extension-kysely'
+import { Kysely } from 'kysely'
 import { format, FormatOptionsWithLanguage } from 'sql-formatter'
 import { DB } from 'src/generated/kysely'
+import { Prisma, PrismaClient } from 'src/generated/prisma/client'
+import { useKysely } from '../common/use-kysely'
 
 function extendClient(prisma: PrismaService) {
-  const kyselyExtension = prismaExtensionKysely({
-    kysely: driver =>
-      new Kysely<DB>({
-        dialect: {
-          // This is where the magic happens!
-          createDriver: () => driver,
-          // Don't forget to customize these to match your database!
-          createAdapter: () => new MysqlAdapter(),
-          createIntrospector: db => new MysqlIntrospector(db),
-          createQueryCompiler: () => new MysqlQueryCompiler(),
-        },
-        plugins: [
-          // Add your favorite plugins here!
-        ],
-      }),
-  })
-  return prisma.$extends(kyselyExtension)
+  return prisma.$extends(useKysely())
 }
 
 export type ExtendedPrismaClient = ReturnType<typeof extendClient>

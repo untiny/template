@@ -92,7 +92,7 @@ export function Property(options?: PropertyOptions) {
 
   /** 字符串长度 */
   if (isDefined(options.maxLength) && isDefined(options.minLength)) {
-    decorators.push(Length(options.maxLength, options.minLength, { ...validationOptions }))
+    decorators.push(Length(options.minLength, options.maxLength, { ...validationOptions }))
   }
   else {
     if (isDefined(options.maxLength)) {

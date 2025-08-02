@@ -1,15 +1,17 @@
+import { ConfigService } from '@nestjs/config'
 import { IoAdapter } from '@nestjs/platform-socket.io'
 import { createAdapter } from '@socket.io/redis-adapter'
 import { createClient } from 'redis'
 import { ServerOptions } from 'socket.io'
+import { Env } from 'src/generated/env'
 
 export class SocketAdapter extends IoAdapter {
   private adapterConstructor: ReturnType<typeof createAdapter>
 
-  async connectToRedis(): Promise<void> {
+  async connectToRedis(configService: ConfigService<Env>): Promise<void> {
     const pubClient = createClient({
-      url: 'redis://192.168.10.200:6379',
-      password: 'fkplkokg5',
+      url: configService.get<string>('REDIS_URL'),
+      password: configService.get<string>('REDIS_PASSWORD'),
     })
 
     const subClient = pubClient.duplicate()
