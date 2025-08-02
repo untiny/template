@@ -26,7 +26,7 @@ export class OpenAPISchema {
     }
     this.schemas.forEach((schema, name) => {
       if (has(document.components?.schemas, name)) {
-        Logger.warn(`Schema with name "${name}" already exists. It will be overwritten.`)
+        Logger.warn(`Schema with name "${name}" already exists. It will be overwritten.`, OpenAPISchema.name)
       }
       // eslint-disable-next-line ts/no-non-null-asserted-optional-chain
       set(document.components?.schemas!, name, schema)

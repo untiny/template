@@ -15,24 +15,24 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   afterInit(server: Server) {
-    Logger.log('Socket Gateway Initialized')
+    Logger.log('Initialized', SocketGateway.name)
     server.sockets.adapter.on('create-room', (room: string) => {
-      Logger.log(`创建了 ${room} 房间`)
+      Logger.log(`创建了 ${room} 房间`, SocketGateway.name)
     })
     server.sockets.adapter.on('delete-room', (room: string) => {
-      Logger.log(`删除了 ${room} 房间`)
+      Logger.log(`删除了 ${room} 房间`, SocketGateway.name)
     })
     server.sockets.adapter.on('join-room', (room: string, id: string) => {
-      Logger.log(`socket ${id} 已加入房间 ${room}`)
+      Logger.log(`socket ${id} 已加入房间 ${room}`, SocketGateway.name)
     })
     server.sockets.adapter.on('leave-room', (room: string, id: string) => {
-      Logger.log(`socket ${id} 已离开房间 ${room}`)
+      Logger.log(`socket ${id} 已离开房间 ${room}`, SocketGateway.name)
     })
     const redisAdapter = server.sockets.adapter as RedisAdapter
     redisAdapter.allRooms().then((rooms) => {
-      Logger.verbose(`当前房间列表: ${Array.from(rooms.keys())}`)
+      Logger.verbose(`当前房间列表: ${Array.from(rooms.keys())}`, SocketGateway.name)
     }).catch((err) => {
-      Logger.error(err)
+      Logger.error(err, SocketGateway.name)
     })
   }
 
