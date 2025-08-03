@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config'
 import { IoAdapter } from '@nestjs/platform-socket.io'
 import { createAdapter } from '@socket.io/redis-adapter'
 import { createClient } from 'redis'
-import { ServerOptions } from 'socket.io'
+import { Server, ServerOptions } from 'socket.io'
 import { Env } from 'src/generated/env'
 
 export class SocketAdapter extends IoAdapter {
@@ -21,8 +21,8 @@ export class SocketAdapter extends IoAdapter {
     this.adapterConstructor = createAdapter(pubClient, subClient)
   }
 
-  createIOServer(port: number, options?: ServerOptions): any {
-    const server = super.createIOServer(port, options)
+  createIOServer(port: number, options?: ServerOptions): Server {
+    const server: Server = super.createIOServer(port, options)
     server.adapter(this.adapterConstructor)
     return server
   }
