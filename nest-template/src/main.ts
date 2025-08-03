@@ -15,6 +15,13 @@ async function bootstrap() {
     logger: useWinston(),
   })
 
+  app.set('json replacer', (key: string, value: any) => {
+    if (typeof value === 'bigint') {
+      return value.toString()
+    }
+    return value
+  })
+
   app.useStaticAssets(join(__dirname, '..', 'public'))
 
   const configService = app.get<ConfigService<Env>>(ConfigService)

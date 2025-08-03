@@ -19,6 +19,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prisma:generate": "prisma generate",
+    "prisma:format": "prisma format",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:migrate:reset": "prisma migrate reset",
@@ -69,6 +70,7 @@
     "redis": "^5.7.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
+    "snowflakify": "^1.0.5",
     "socket.io": "^4.8.1",
     "sql-formatter": "^15.6.6",
     "ua-parser-js": "^2.0.4",
@@ -109,7 +111,7 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.20.3",
-    "typescript": "^5.9.2",
+    "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0"
   },
   "jest": {

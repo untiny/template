@@ -37,7 +37,7 @@ export class AuthService {
       return null
     }
     const hashPassword = hash('sha1', password)
-    return isEqual(user.password, hashPassword) ? { id: user.id } : null
+    return isEqual(user.password, hashPassword) ? { id: user.id.toString() } : null
   }
 
   async login(loginDto: LoginDto): Promise<TokenResponseDto> {
@@ -52,7 +52,7 @@ export class AuthService {
     await this.userService.checkEmailExist(registerDto.email)
     registerDto.password = hash('sha1', registerDto.password)
     const user = await this.userService.create(registerDto)
-    return await this.generateToken({ id: user.id })
+    return await this.generateToken({ id: user.id.toString() })
   }
 
   async refreshToken(refreshToken: string): Promise<TokenResponseDto> {

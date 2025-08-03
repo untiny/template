@@ -32,7 +32,7 @@ export class UserService {
     })
   }
 
-  async getUser(id: number) {
+  async getUser(id: bigint) {
     const user = await this.prismaService.user.findUnique({
       where: { id },
     })

@@ -1,9 +1,10 @@
 model User {
-  id          Int      @id @default(autoincrement())
+  /// 用户ID @kyselyType(bigint)
+  id          BigInt   @id @default(autoincrement())
   /// 创建时间
   create_time DateTime @default(now())
   /// 更新时间
-  update_time DateTime @updatedAt
+  update_time DateTime @default(now()) @updatedAt
   /// 邮箱
   email       String   @unique
   /// 用户名

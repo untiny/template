@@ -1,8 +1,9 @@
-import { Controller, Get, Param, ParseIntPipe, Query, UseGuards } from '@nestjs/common'
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
 import { AuthUser } from 'src/auth/decorators'
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard'
 import { CursorPaginationDto } from 'src/common/dto/pagination.dto'
+import { ParseBigIntPipe } from 'src/common/pipes/parse-bigint.pipe'
 import { UserService } from './user.service'
 
 @ApiTags('User')
@@ -20,14 +21,14 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '获取当前用户信息' })
   @ApiBearerAuth()
-  async getCurrentUser(@AuthUser('id') id: number) {
+  async getCurrentUser(@AuthUser('id', ParseBigIntPipe) id: bigint) {
     return await this.userService.getUser(id)
   }
 
   @Get(':id')
   @ApiOperation({ summary: '获取用户信息' })
   @ApiParam({ name: 'id', type: 'integer', description: '用户ID' })
-  async getUser(@Param('id', ParseIntPipe) id: number) {
+  async getUser(@Param('id', ParseBigIntPipe) id: bigint) {
     return await this.userService.getUser(id)
   }
 

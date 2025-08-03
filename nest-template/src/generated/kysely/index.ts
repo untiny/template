@@ -5,7 +5,10 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export type User = {
-    id: Generated<number>;
+    /**
+     * 用户ID @kyselyType(bigint)
+     */
+    id: Generated<bigint>;
     /**
      * 创建时间
      */
@@ -13,7 +16,7 @@ export type User = {
     /**
      * 更新时间
      */
-    update_time: Timestamp;
+    update_time: Generated<Timestamp>;
     /**
      * 邮箱
      */

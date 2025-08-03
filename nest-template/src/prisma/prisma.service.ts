@@ -6,10 +6,11 @@ import { Kysely } from 'kysely'
 import { format, FormatOptionsWithLanguage } from 'sql-formatter'
 import { DB } from 'src/generated/kysely'
 import { Prisma, PrismaClient } from 'src/generated/prisma/client'
-import { useKysely } from '../common/use-kysely'
+import { kyselyExtend } from './extends/kysely.extend'
+import { snowflakeExtend } from './extends/snowflake.extend'
 
 function extendClient(prisma: PrismaService) {
-  return prisma.$extends(useKysely())
+  return prisma.$extends(kyselyExtend).$extends(snowflakeExtend)
 }
 
 export type ExtendedPrismaClient = ReturnType<typeof extendClient>
@@ -97,7 +98,12 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Pris
   private parseParams(event: Prisma.QueryEvent): string[] | string {
     const dateRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3} UTC$/
     try {
-      const params: unknown[] = event.params ? JSON.parse(event.params as string) : []
+      const params: unknown[] = event.params
+        ? JSON.parse((event.params as string).replace(
+            /(?<=\[|\s)(-?\d{16,})(?=\s*[,|\]])/g,
+            '"$1"'
+          ))
+        : []
       return params.map((param) => {
         if (typeof param === 'string') {
           if (dateRegex.test(param)) {

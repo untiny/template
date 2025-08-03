@@ -1,6 +1,6 @@
 declare global {
   interface RequestUser {
-    id: number
+    id: string
     iat?: number
     exp?: number
   }
