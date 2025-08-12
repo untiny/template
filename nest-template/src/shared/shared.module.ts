@@ -20,8 +20,8 @@ import { Env } from 'src/generated/env'
         return {
           stores: [
             createKeyv({
-              url: configService.get<string>('REDIS_URL'),
-              password: configService.get<string>('REDIS_PASSWORD'),
+              url: configService.getOrThrow<string>('REDIS_URL'),
+              password: configService.getOrThrow<string>('REDIS_PASSWORD'),
             }),
           ],
           cacheId: 'nest-template',

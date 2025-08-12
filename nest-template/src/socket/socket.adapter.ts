@@ -10,8 +10,8 @@ export class SocketAdapter extends IoAdapter {
 
   async connectToRedis(configService: ConfigService<Env>): Promise<void> {
     const pubClient = createClient({
-      url: configService.get<string>('REDIS_URL'),
-      password: configService.get<string>('REDIS_PASSWORD'),
+      url: configService.getOrThrow<string>('REDIS_URL'),
+      password: configService.getOrThrow<string>('REDIS_PASSWORD'),
     })
 
     const subClient = pubClient.duplicate()
