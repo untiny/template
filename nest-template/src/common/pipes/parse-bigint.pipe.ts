@@ -5,16 +5,19 @@ import {
   PipeTransform,
 } from '@nestjs/common'
 import { isNumberString } from 'class-validator'
+import { ClsService } from 'nestjs-cls'
+import { formatValidationMethodErrorMessage } from '../utils'
 
 @Injectable()
 export class ParseBigIntPipe implements PipeTransform {
-  transform(value: string, _: ArgumentMetadata) {
+  constructor(private readonly cls: ClsService) {}
+
+  transform(value: string, metadata: ArgumentMetadata) {
     if (typeof value === 'bigint')
       return value
     if (!isNumberString(value, { no_symbols: true })) {
-      throw new BadRequestException(
-        'Validation failed (numeric string is expected)',
-      )
+      const message = formatValidationMethodErrorMessage('isNumberString', `${metadata.data!}`, this.cls.get('language'))
+      throw new BadRequestException(message)
     }
     return BigInt(value)
   }

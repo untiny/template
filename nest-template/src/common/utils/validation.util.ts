@@ -177,3 +177,35 @@ export function formatValidationErrorMessage(errors: ValidationError[], language
   const message = formattedErrors.join('\n') || 'Validation failed'
   return message
 }
+
+export function formatValidationMethodErrorMessage(
+  method: ValidationMethod,
+  property: string,
+  language?: Language
+): string
+export function formatValidationMethodErrorMessage(
+  method: ValidationMethod,
+  property: Omit<ValidationMessageArguments, | 'object' | 'targetName' | 'constraints' | 'value'> & Partial<ValidationMessageArguments>,
+  language?: Language
+): string
+export function formatValidationMethodErrorMessage(
+  method: ValidationMethod,
+  property: string | Omit<ValidationMessageArguments, | 'object' | 'targetName' | 'constraints' | 'value'> & Partial<ValidationMessageArguments>,
+  language: Language = Language.ZH
+): string {
+  const args: ValidationMessageArguments = {
+    object: {},
+    value: null,
+    targetName: '',
+    constraints: [],
+    each: false,
+    ...(typeof property === 'string' ? { property } : property),
+  }
+  const buildMessage = getValidationBuildMessage(language, method)
+  if (!buildMessage) {
+    Logger.warn(`未找到 ${language}.${method} 的错误消息`, 'ValidationPipe')
+    return 'Validation failed'
+  }
+  const message = buildMessage(args) as string
+  return replaceMessageSpecialTokens(message, args)
+}
