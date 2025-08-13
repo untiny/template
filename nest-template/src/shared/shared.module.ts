@@ -4,6 +4,7 @@ import { CacheModule } from '@nestjs/cache-manager'
 import { Global, Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { EventEmitterModule } from '@nestjs/event-emitter'
+import ms from 'ms'
 import { ClsModule } from 'nestjs-cls'
 import { AcceptLanguageResolver, CookieResolver, HeaderResolver, I18nModule, I18nYamlLoader, QueryResolver } from 'nestjs-i18n'
 import { setupCls } from 'src/common/setup-cls'
@@ -18,13 +19,11 @@ import { Env } from 'src/generated/env'
       inject: [ConfigService],
       useFactory: async (configService: ConfigService<Env>) => {
         return {
-          stores: [
-            createKeyv({
-              url: configService.getOrThrow<string>('REDIS_URL'),
-              password: configService.getOrThrow<string>('REDIS_PASSWORD'),
-            }),
-          ],
-          cacheId: 'nest-template',
+          stores: createKeyv({
+            url: configService.getOrThrow<string>('REDIS_URL'),
+            password: configService.getOrThrow<string>('REDIS_PASSWORD'),
+          }),
+          ttl: ms('1h'),
         }
       },
     }),
@@ -32,7 +31,10 @@ import { Env } from 'src/generated/env'
     I18nModule.forRoot({
       loader: I18nYamlLoader,
       fallbackLanguage: 'zh',
-      loaderOptions: { path: join('src', 'i18n'), watch: true },
+      loaderOptions: {
+        path: join('src', 'i18n'),
+        watch: process.env.NODE_ENV !== 'production', // 生产环境关闭监听，开发环境开启
+      },
       typesOutputPath: join('src', 'generated', 'i18n', 'index.ts'),
       resolvers: [
         { use: QueryResolver, options: ['lang'] },

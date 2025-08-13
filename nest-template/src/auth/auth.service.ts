@@ -1,9 +1,8 @@
 import { hash } from 'node:crypto'
-import { CACHE_MANAGER } from '@nestjs/cache-manager'
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common'
+import { Cache } from '@nestjs/cache-manager'
+import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService, JwtSignOptions, TokenExpiredError } from '@nestjs/jwt'
-import { Cache } from 'cache-manager'
 import { isEqual } from 'lodash'
 import { Env } from 'src/generated/env'
 import { UserService } from 'src/user/user.service'
@@ -18,7 +17,7 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
-    @Inject(CACHE_MANAGER) private readonly cache: Cache,
+    private readonly cache: Cache,
     private readonly configService: ConfigService<Env>,
   ) {
     this.accessJwt = {
@@ -66,7 +65,7 @@ export class AuthService {
     try {
       const user = await this.jwtService.verifyAsync<RequestUser>(refreshToken, this.refreshJwt)
       // 计算剩余过期时间
-      const remainingTime = (user.exp! - Date.now() / 1000) * 1000
+      const remainingTime = Math.floor((user.exp! - Date.now() / 1000))
       await this.cache.set(`expired_refresh_token:${refreshToken}`, true, remainingTime)
       return await this.generateToken(user)
     }

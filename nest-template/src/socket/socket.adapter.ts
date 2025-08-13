@@ -18,10 +18,17 @@ export class SocketAdapter extends IoAdapter {
 
     await Promise.all([pubClient.connect(), subClient.connect()])
 
-    this.adapterConstructor = createAdapter(pubClient, subClient)
+    const name = configService.get<string>('APP_NAME')
+
+    this.adapterConstructor = createAdapter(pubClient, subClient, {
+      key: `${name ? `${name}.` : ''}socket.io`,
+    })
   }
 
   createIOServer(port: number, options?: ServerOptions): Server {
+    if (!this.adapterConstructor) {
+      throw new Error('Redis adapter not initialized. Call connectToRedis() first.')
+    }
     const server: Server = super.createIOServer(port, options)
     server.adapter(this.adapterConstructor)
     return server
