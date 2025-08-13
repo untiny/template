@@ -1,3 +1,5 @@
 <template>
-  <h1>index</h1>
+  <h1 class="text-4xl">
+    index
+  </h1>
 </template>

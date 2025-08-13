@@ -7,6 +7,7 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxt/devtools',
     '@nuxtjs/tailwindcss',
+    '@vueuse/nuxt',
   ],
   imports: {
     autoImport: true,
