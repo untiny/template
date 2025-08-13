@@ -1,7 +1,7 @@
-import { INestApplication, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
+/* eslint-disable no-console */
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { ITXClientDenyList, UnwrapTuple } from '@prisma/client/runtime/library'
-import consola from 'consola'
+import { UnwrapTuple } from '@prisma/client/runtime/library'
 import { blue, green } from 'kolorist'
 import { Kysely } from 'kysely'
 import { format, FormatOptionsWithLanguage } from 'sql-formatter'
@@ -9,11 +9,10 @@ import { DB } from 'src/generated/kysely'
 import { Prisma, PrismaClient } from 'src/generated/prisma/client'
 import { createKysely } from './extends/kysely.extend'
 import { snowflakeExtend } from './extends/snowflake.extend'
+import { PrismaContextWithKysely, PrismaTransactionFnWithKysely } from './prisma.interface'
 
 @Injectable()
-export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Prisma.LogLevel | 'beforeExit'> implements OnModuleInit, OnModuleDestroy {
-  private enableDebug: boolean = false
-
+export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Prisma.LogLevel> implements OnModuleInit, OnModuleDestroy {
   public $kysely: Kysely<DB>
 
   constructor(private readonly configService: ConfigService) {
@@ -26,9 +25,11 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Pris
 
     super({ log })
 
-    this.enableDebug = this.configService.get<string>('SQL_DEBUG', 'false') === 'true'
+    const enableDebug = this.configService.get<string>('SQL_DEBUG', 'false') === 'true'
 
-    this.$on('query', event => this.handleQuery(event))
+    if (enableDebug) {
+      this.$on('query', event => this.handleQuery(event))
+    }
     this.$on('info', event => this.handleInfo(event))
     this.$on('warn', event => this.handleWarn(event))
     this.$on('error', event => this.handleError(event))
@@ -44,32 +45,29 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Pris
     await this.$disconnect()
   }
 
-  async enableShutdownHooks(app: INestApplication) {
-    Logger.log('Enable shutdown hooks', PrismaService.name)
-    this.$on('beforeExit', async () => {
-      await app.close()
-    })
-  }
-
   public static create(configService: ConfigService) {
     const prisma = new PrismaService(configService)
     return prisma.$extends(snowflakeExtend)
   }
 
   public $transaction<P extends Prisma.PrismaPromise<any>[]>(arg: [...P], options?: { isolationLevel?: Prisma.TransactionIsolationLevel }): Promise<UnwrapTuple<P>>
-  public $transaction<R>(fn: (prisma: Omit<PrismaClient, ITXClientDenyList> & { $kysely: Kysely<DB> }) => Promise<R>, options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): Promise<R>
-  public $transaction(fn: Prisma.PrismaPromise<any>[] | ((prisma: Omit<PrismaClient, ITXClientDenyList> & { $kysely: Kysely<DB> }) => Promise<any>), options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): ReturnType<PrismaClient['$transaction']> {
+  public $transaction<R>(fn: PrismaTransactionFnWithKysely<R>, options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): Promise<R>
+  public $transaction(fn: Prisma.PrismaPromise<any>[] | PrismaTransactionFnWithKysely, options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): ReturnType<PrismaClient['$transaction']> {
     if (typeof fn === 'function') {
       return super.$transaction(async (tx) => {
-        const prisma = new Proxy(tx, {
+        let kyselyInstance: Kysely<DB>
+        const prismaWithKysely = new Proxy(tx, {
           get: (target, prop, receiver) => {
             if (prop === '$kysely') {
-              return createKysely(target)
+              if (!kyselyInstance) {
+                kyselyInstance = createKysely(target)
+              }
+              return kyselyInstance
             }
             return Reflect.get(target, prop, receiver)
           },
         })
-        return await fn(prisma as Omit<PrismaClient, ITXClientDenyList> & { $kysely: Kysely<DB> })
+        return await fn(prismaWithKysely as PrismaContextWithKysely)
       }, options)
     }
     return super.$transaction(fn, options)
@@ -89,9 +87,6 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Pris
   }
 
   private handleQuery(event: Prisma.QueryEvent) {
-    if (!this.enableDebug) {
-      return
-    }
     const params = this.parseParams(event)
     const config: FormatOptionsWithLanguage = {
       language: 'mysql',
@@ -100,12 +95,12 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Pris
     if (Array.isArray(params)) {
       config.params = params
       const sql = format(event.query as string, config)
-      consola.log(sql)
+      console.log(sql)
     }
     else {
       const sql = format(event.query as string, config)
-      consola.log(sql)
-      consola.log(blue(params))
+      console.log(sql)
+      console.log(blue(params))
     }
   }
 

@@ -1,12 +1,12 @@
-import { PrismaClient } from '@prisma/client/extension'
 import { CompiledQuery, DatabaseConnection, DeleteQueryNode, Driver, InsertQueryNode, Kysely, MysqlAdapter, MysqlIntrospector, MysqlQueryCompiler, QueryResult, TransactionSettings, UpdateQueryNode } from 'kysely'
 import { DB } from 'src/generated/kysely'
+import { PrismaContext } from '../prisma.interface'
 
 /**
  * A Kysely database connection that uses Prisma as the driver
  */
 export class PrismaConnection implements DatabaseConnection {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaContext) {}
 
   async executeQuery<R>(
     compiledQuery: CompiledQuery<unknown>,
@@ -23,7 +23,7 @@ export class PrismaConnection implements DatabaseConnection {
     // Execute the query with $executeRawUnsafe to get the number of affected rows
     if (shouldReturnAffectedRows) {
       const numAffectedRows = BigInt(
-        // eslint-disable-next-line ts/no-unsafe-argument
+
         await this.prisma.$executeRawUnsafe(sql, ...parameters),
       )
       return {
@@ -34,7 +34,7 @@ export class PrismaConnection implements DatabaseConnection {
     }
 
     // Otherwise, execute it with $queryRawUnsafe to get the query results
-    const rows = await this.prisma.$queryRawUnsafe(sql, ...parameters)
+    const rows: R[] = await this.prisma.$queryRawUnsafe(sql, ...parameters)
     return { rows }
   }
 
@@ -48,7 +48,7 @@ export class PrismaConnection implements DatabaseConnection {
   }
 }
 
-export class PrismaDriver<T extends PrismaClient> implements Driver {
+export class PrismaDriver<T extends PrismaContext> implements Driver {
   constructor(private readonly prisma: T) {}
 
   async init(): Promise<void> {}
@@ -77,19 +77,7 @@ export class PrismaDriver<T extends PrismaClient> implements Driver {
   async destroy(): Promise<void> {}
 }
 
-export class PrismaKyselyExtensionError extends Error {
-  constructor(message: string) {
-    super(message)
-    this.name = 'PrismaKyselyExtensionError'
-  }
-}
-
-export function createKysely<T extends PrismaClient>(client: T) {
-  // if ('$kysely' in (client as object)) {
-  //   throw new PrismaKyselyExtensionError(
-  //     'The Prisma client is already extended with Kysely',
-  //   )
-  // }
+export function createKysely<T extends PrismaContext>(client: T) {
   return new Kysely<DB>({
     dialect: {
       // This is where the magic happens!

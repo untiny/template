@@ -35,11 +35,6 @@ async function bootstrap() {
 
   await useSwagger(app)
 
-  process?.on('SIGINT', async () => {
-    Logger.log('Shutting down...', 'Bootstrap')
-    await app.close()
-  })
-
   await app.listen(port)
 
   await useServerUrl(app)
