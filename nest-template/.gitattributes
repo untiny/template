@@ -1,3 +1,1 @@
-# 所有 TypeScript / JavaScript 文件使用 LF
-*.ts text eol=lf
-*.js text eol=lf
+* text eol=lf
