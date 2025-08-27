@@ -1,5 +1,14 @@
 import { Logger, OnApplicationShutdown } from '@nestjs/common'
-import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets'
+import {
+  ConnectedSocket,
+  MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets'
 import { RedisAdapter } from '@socket.io/redis-adapter'
 import { Server, Socket } from 'socket.io'
 import { SocketService } from './socket.service'
@@ -8,7 +17,8 @@ import { SocketService } from './socket.service'
 export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect, OnApplicationShutdown {
   @WebSocketServer() server: Server
 
-  constructor(private readonly socketService: SocketService,) {}
+  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: <未使用>
+  constructor(private readonly socketService: SocketService) {}
 
   get redisAdapter() {
     return this.server.sockets.adapter as RedisAdapter
@@ -29,15 +39,21 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       Logger.log(`socket ${id} 已离开房间 ${room}`, SocketGateway.name)
     })
     const redisAdapter = server.sockets.adapter as RedisAdapter
-    redisAdapter.allRooms().then((rooms) => {
-      Logger.verbose(`当前房间列表: ${Array.from(rooms.keys())}`, SocketGateway.name)
-    }).catch((err) => {
-      Logger.error(err, SocketGateway.name)
-    })
+    redisAdapter
+      .allRooms()
+      .then((rooms) => {
+        Logger.verbose(`当前房间列表: ${Array.from(rooms.keys())}`, SocketGateway.name)
+      })
+      .catch((err) => {
+        Logger.error(err, SocketGateway.name)
+      })
   }
 
   async handleConnection(client: Socket) {
-    Logger.log(`Pid: ${process.pid}, Rooms: ${Array.from(this.server.sockets.adapter.rooms.keys())}`, SocketGateway.name)
+    Logger.log(
+      `Pid: ${process.pid}, Rooms: ${Array.from(this.server.sockets.adapter.rooms.keys())}`,
+      SocketGateway.name,
+    )
     await client.join(`${process.pid}`)
     this.server.emit('message', `Pid: ${process.pid}, ClientId: ${client.id}`)
   }
@@ -60,7 +76,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   async getRoomSocketIds(room: string[] | string) {
     const sockets = await this.getRoomSockets(room)
-    return sockets.map(socket => socket.id)
+    return sockets.map((socket) => socket.id)
   }
 
   @SubscribeMessage('message')

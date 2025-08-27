@@ -11,13 +11,7 @@ import { SocketModule } from './socket/socket.module'
 import { UserModule } from './user/user.module'
 
 @Module({
-  imports: [
-    SharedModule,
-    PrismaModule,
-    AuthModule,
-    UserModule,
-    SocketModule,
-  ],
+  imports: [SharedModule, PrismaModule, AuthModule, UserModule, SocketModule],
   controllers: [AppController],
   providers: [
     { provide: APP_PIPE, useClass: I18nValidationPipe },

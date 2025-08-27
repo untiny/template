@@ -9,6 +9,4 @@ export interface PrismaContextWithKysely extends PrismaContext {
   $kysely: Kysely<DB>
 }
 
-export interface PrismaTransactionFnWithKysely<R = any> {
-  (prisma: PrismaContextWithKysely): Promise<R>
-}
+export type PrismaTransactionFnWithKysely<R = any> = (prisma: PrismaContextWithKysely) => Promise<R>

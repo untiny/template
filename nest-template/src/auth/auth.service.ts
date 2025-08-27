@@ -65,11 +65,10 @@ export class AuthService {
     try {
       const user = await this.jwtService.verifyAsync<RequestUser>(refreshToken, this.refreshJwt)
       // 计算剩余过期时间
-      const remainingTime = Math.floor((user.exp! - Date.now() / 1000))
+      const remainingTime = Math.floor((user.exp as number) - Date.now() / 1000)
       await this.cache.set(`expired_refresh_token:${refreshToken}`, true, remainingTime)
       return await this.generateToken(user)
-    }
-    catch (error) {
+    } catch (error) {
       if (error instanceof TokenExpiredError) {
         throw new UnauthorizedException('刷新令牌已过期')
       }

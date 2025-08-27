@@ -1,10 +1,9 @@
-/* eslint-disable no-console */
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { UnwrapTuple } from '@prisma/client/runtime/library'
 import { blue, green } from 'kolorist'
 import { Kysely } from 'kysely'
-import { format, FormatOptionsWithLanguage } from 'sql-formatter'
+import { FormatOptionsWithLanguage, format } from 'sql-formatter'
 import { DB } from 'src/generated/kysely'
 import { Prisma, PrismaClient } from 'src/generated/prisma/client'
 import { createKysely } from './extends/kysely.extend'
@@ -12,7 +11,10 @@ import { snowflakeExtend } from './extends/snowflake.extend'
 import { PrismaContextWithKysely, PrismaTransactionFnWithKysely } from './prisma.interface'
 
 @Injectable()
-export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Prisma.LogLevel> implements OnModuleInit, OnModuleDestroy {
+export class PrismaService
+  extends PrismaClient<Prisma.PrismaClientOptions, Prisma.LogLevel>
+  implements OnModuleInit, OnModuleDestroy
+{
   public $kysely: Kysely<DB>
 
   constructor(private readonly configService: ConfigService) {
@@ -28,11 +30,11 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Pris
     const enableDebug = this.configService.get<string>('SQL_DEBUG', 'false') === 'true'
 
     if (enableDebug) {
-      this.$on('query', event => this.handleQuery(event))
+      this.$on('query', (event) => this.handleQuery(event))
     }
-    this.$on('info', event => this.handleInfo(event))
-    this.$on('warn', event => this.handleWarn(event))
-    this.$on('error', event => this.handleError(event))
+    this.$on('info', (event) => this.handleInfo(event))
+    this.$on('warn', (event) => this.handleWarn(event))
+    this.$on('error', (event) => this.handleError(event))
 
     this.$kysely = createKysely(this)
   }
@@ -50,9 +52,18 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Pris
     return prisma.$extends(snowflakeExtend)
   }
 
-  public $transaction<P extends Prisma.PrismaPromise<any>[]>(arg: [...P], options?: { isolationLevel?: Prisma.TransactionIsolationLevel }): Promise<UnwrapTuple<P>>
-  public $transaction<R>(fn: PrismaTransactionFnWithKysely<R>, options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): Promise<R>
-  public $transaction(fn: Prisma.PrismaPromise<any>[] | PrismaTransactionFnWithKysely, options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): ReturnType<PrismaClient['$transaction']> {
+  public $transaction<P extends Prisma.PrismaPromise<any>[]>(
+    arg: [...P],
+    options?: { isolationLevel?: Prisma.TransactionIsolationLevel },
+  ): Promise<UnwrapTuple<P>>
+  public $transaction<R>(
+    fn: PrismaTransactionFnWithKysely<R>,
+    options?: { maxWait?: number; timeout?: number; isolationLevel?: Prisma.TransactionIsolationLevel },
+  ): Promise<R>
+  public $transaction(
+    fn: Prisma.PrismaPromise<any>[] | PrismaTransactionFnWithKysely,
+    options?: { maxWait?: number; timeout?: number; isolationLevel?: Prisma.TransactionIsolationLevel },
+  ): ReturnType<PrismaClient['$transaction']> {
     if (typeof fn === 'function') {
       return super.$transaction(async (tx) => {
         let kyselyInstance: Kysely<DB>
@@ -96,8 +107,7 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Pris
       config.params = params
       const sql = format(event.query as string, config)
       console.log(sql)
-    }
-    else {
+    } else {
       const sql = format(event.query as string, config)
       console.log(sql)
       console.log(blue(params))
@@ -108,10 +118,7 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Pris
     const dateRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3} UTC$/
     try {
       const params: unknown[] = event.params
-        ? JSON.parse((event.params as string).replace(
-            /(?<=\[|\s)(-?\d{16,})(?=\s*[,|\]])/g,
-            '"$1"'
-          ))
+        ? JSON.parse((event.params as string).replace(/(?<=\[|\s)(-?\d{16,})(?=\s*[,|\]])/g, '"$1"'))
         : []
       return params.map((param) => {
         if (typeof param === 'string') {
@@ -122,8 +129,7 @@ export class PrismaService extends PrismaClient<Prisma.PrismaClientOptions, Pris
         }
         return green(JSON.stringify(param))
       })
-    }
-    catch {
+    } catch {
       return event.params
     }
   }

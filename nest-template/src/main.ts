@@ -1,8 +1,8 @@
-import type { NestExpressApplication } from '@nestjs/platform-express'
 import { join } from 'node:path'
 import { Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
+import type { NestExpressApplication } from '@nestjs/platform-express'
 import { AppModule } from './app.module'
 import { useServerUrl } from './common/use-server-url'
 import { useSwagger } from './common/use-swagger'
@@ -15,7 +15,7 @@ async function bootstrap() {
     logger: useWinston(),
   })
 
-  app.set('json replacer', (key: string, value: any) => {
+  app.set('json replacer', (_: string, value: any) => {
     if (typeof value === 'bigint') {
       return value.toString()
     }

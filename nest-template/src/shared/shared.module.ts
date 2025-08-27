@@ -6,7 +6,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { EventEmitterModule } from '@nestjs/event-emitter'
 import ms from 'ms'
 import { ClsModule } from 'nestjs-cls'
-import { AcceptLanguageResolver, CookieResolver, HeaderResolver, I18nModule, I18nYamlLoader, QueryResolver } from 'nestjs-i18n'
+import {
+  AcceptLanguageResolver,
+  CookieResolver,
+  HeaderResolver,
+  I18nModule,
+  I18nYamlLoader,
+  QueryResolver,
+} from 'nestjs-i18n'
 import { setupCls } from 'src/common/setup-cls'
 import { Env } from 'src/generated/env'
 

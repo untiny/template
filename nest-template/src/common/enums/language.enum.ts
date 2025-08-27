@@ -9,9 +9,9 @@ export const Language: UnionToEnum<Language> = {
 export const languages = Object.values(Language) as Language[]
 
 OpenAPISchema.set('LanguageEnum', {
-  'type': 'string',
-  'enum': languages,
-  'example': Language.ZH,
+  type: 'string',
+  enum: languages,
+  example: Language.ZH,
   'x-enumDescriptions': {
     [Language.ZH]: '简体中文',
     [Language.EN]: '英语',

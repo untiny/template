@@ -15,7 +15,7 @@ export function setupCls(cls: ClsService, context: ExecutionContext) {
   if (type === 'http') {
     const request = context.switchToHttp().getRequest<Request>()
     if (request.headers) {
-      const timezone = request.headers.timezone as string ?? 'Asia/Shanghai'
+      const timezone = (request.headers.timezone as string) ?? 'Asia/Shanghai'
       cls.set('timezone', timezone)
     }
   }

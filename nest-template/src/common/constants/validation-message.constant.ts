@@ -1,13 +1,116 @@
-import { ARRAY_CONTAINS, ARRAY_MAX_SIZE, ARRAY_MIN_SIZE, ARRAY_NOT_CONTAINS, ARRAY_NOT_EMPTY, ARRAY_UNIQUE, CONTAINS, EQUALS, IS_ALPHA, IS_ALPHANUMERIC, IS_ARRAY, IS_ASCII, IS_BASE32, IS_BASE58, IS_BASE64, IS_BIC, IS_BOOLEAN, IS_BOOLEAN_STRING, IS_BTC_ADDRESS, IS_BYTE_LENGTH, IS_CREDIT_CARD, IS_CURRENCY, IS_DATA_URI, IS_DATE, IS_DATE_STRING, IS_DECIMAL, IS_DIVISIBLE_BY, IS_EAN, IS_EMAIL, IS_EMPTY, IS_ENUM, IS_ETHEREUM_ADDRESS, IS_FIREBASE_PUSH_ID, IS_FQDN, IS_FULL_WIDTH, IS_HALF_WIDTH, IS_HASH, IS_HEX_COLOR, IS_HEXADECIMAL, IS_HSL, IS_IBAN, IS_IDENTITY_CARD, IS_IN, IS_INSTANCE, IS_INT, IS_IP, IS_ISBN, IS_ISIN, IS_ISO4217_CURRENCY_CODE, IS_ISO8601, IS_ISO31661_ALPHA_2, IS_ISO31661_ALPHA_3, IS_ISRC, IS_ISSN, IS_JSON, IS_JWT, IS_LATITUDE, IS_LATLONG, IS_LENGTH, IS_LOCALE, IS_LONGITUDE, IS_LOWERCASE, IS_MAC_ADDRESS, IS_MAGNET_URI, IS_MILITARY_TIME, IS_MIME_TYPE, IS_MOBILE_PHONE, IS_MONGO_ID, IS_MULTIBYTE, IS_NEGATIVE, IS_NOT_EMPTY, IS_NOT_IN, IS_NUMBER, IS_NUMBER_STRING, IS_OBJECT, IS_OCTAL, IS_PASSPORT_NUMBER, IS_PHONE_NUMBER, IS_PORT, IS_POSITIVE, IS_POSTAL_CODE, IS_RFC_3339, IS_RGB_COLOR, IS_SEM_VER, IS_STRING, IS_STRONG_PASSWORD, IS_SURROGATE_PAIR, IS_TAX_ID, IS_TIMEZONE, IS_UPPERCASE, IS_URL, IS_UUID, IS_VARIABLE_WIDTH, MATCHES, MAX, MAX_DATE, MAX_LENGTH, MIN, MIN_DATE, MIN_LENGTH, NOT_CONTAINS, NOT_EQUALS, ValidationArguments, ValidationOptions } from 'class-validator'
+import {
+  ARRAY_CONTAINS,
+  ARRAY_MAX_SIZE,
+  ARRAY_MIN_SIZE,
+  ARRAY_NOT_CONTAINS,
+  ARRAY_NOT_EMPTY,
+  ARRAY_UNIQUE,
+  CONTAINS,
+  EQUALS,
+  IS_ALPHA,
+  IS_ALPHANUMERIC,
+  IS_ARRAY,
+  IS_ASCII,
+  IS_BASE32,
+  IS_BASE58,
+  IS_BASE64,
+  IS_BIC,
+  IS_BOOLEAN,
+  IS_BOOLEAN_STRING,
+  IS_BTC_ADDRESS,
+  IS_BYTE_LENGTH,
+  IS_CREDIT_CARD,
+  IS_CURRENCY,
+  IS_DATA_URI,
+  IS_DATE,
+  IS_DATE_STRING,
+  IS_DECIMAL,
+  IS_DIVISIBLE_BY,
+  IS_EAN,
+  IS_EMAIL,
+  IS_EMPTY,
+  IS_ENUM,
+  IS_ETHEREUM_ADDRESS,
+  IS_FIREBASE_PUSH_ID,
+  IS_FQDN,
+  IS_FULL_WIDTH,
+  IS_HALF_WIDTH,
+  IS_HASH,
+  IS_HEX_COLOR,
+  IS_HEXADECIMAL,
+  IS_HSL,
+  IS_IBAN,
+  IS_IDENTITY_CARD,
+  IS_IN,
+  IS_INSTANCE,
+  IS_INT,
+  IS_IP,
+  IS_ISBN,
+  IS_ISIN,
+  IS_ISO4217_CURRENCY_CODE,
+  IS_ISO8601,
+  IS_ISO31661_ALPHA_2,
+  IS_ISO31661_ALPHA_3,
+  IS_ISRC,
+  IS_ISSN,
+  IS_JSON,
+  IS_JWT,
+  IS_LATITUDE,
+  IS_LATLONG,
+  IS_LENGTH,
+  IS_LOCALE,
+  IS_LONGITUDE,
+  IS_LOWERCASE,
+  IS_MAC_ADDRESS,
+  IS_MAGNET_URI,
+  IS_MILITARY_TIME,
+  IS_MIME_TYPE,
+  IS_MOBILE_PHONE,
+  IS_MONGO_ID,
+  IS_MULTIBYTE,
+  IS_NEGATIVE,
+  IS_NOT_EMPTY,
+  IS_NOT_IN,
+  IS_NUMBER,
+  IS_NUMBER_STRING,
+  IS_OBJECT,
+  IS_OCTAL,
+  IS_PASSPORT_NUMBER,
+  IS_PHONE_NUMBER,
+  IS_PORT,
+  IS_POSITIVE,
+  IS_POSTAL_CODE,
+  IS_RFC_3339,
+  IS_RGB_COLOR,
+  IS_SEM_VER,
+  IS_STRING,
+  IS_STRONG_PASSWORD,
+  IS_SURROGATE_PAIR,
+  IS_TAX_ID,
+  IS_TIMEZONE,
+  IS_UPPERCASE,
+  IS_URL,
+  IS_UUID,
+  IS_VARIABLE_WIDTH,
+  MATCHES,
+  MAX,
+  MAX_DATE,
+  MAX_LENGTH,
+  MIN,
+  MIN_DATE,
+  MIN_LENGTH,
+  NOT_CONTAINS,
+  NOT_EQUALS,
+  ValidationArguments,
+  ValidationOptions,
+} from 'class-validator'
 import { Language } from '../enums/language.enum'
 
 export interface ValidationMessageArguments extends ValidationArguments, Pick<ValidationOptions, 'each'> {
   message?: string
 }
 
-export interface BuildMessage {
-  (options: ValidationMessageArguments): string
-}
+export type BuildMessage = (options: ValidationMessageArguments) => string
 
 export const DefaultValidationMessage = {
   [ARRAY_CONTAINS]: (options: ValidationMessageArguments): string => {
@@ -88,8 +191,7 @@ export const DefaultValidationMessage = {
   [IS_INSTANCE]: (options: ValidationMessageArguments): string => {
     if (options.constraints[0]) {
       return `${options.each ? 'each value in ' : ''}$property must be an instance of ${options.constraints[0].name}`
-    }
-    else {
+    } else {
       return `${options.each ? 'each value in ' : ''}isInstance decorator expects and object as value, but got falsy value.`
     }
   },
@@ -290,8 +392,7 @@ export const DefaultValidationMessage = {
     const isMaxLength = options?.constraints[1] !== null && options?.constraints[1] !== undefined
     if (isMinLength && (!options.value || options.value.length < options?.constraints[0])) {
       return `${options.each ? 'each value in ' : ''}$property must be longer than or equal to $constraint1 characters`
-    }
-    else if (isMaxLength && options.value.length > options?.constraints[1]) {
+    } else if (isMaxLength && options.value.length > options?.constraints[1]) {
       return `${options.each ? 'each value in ' : ''}$property must be shorter than or equal to $constraint2 characters`
     }
     return `${options.each ? 'each value in ' : ''}$property must be longer than or equal to $constraint1 and shorter than or equal to $constraint2 characters`
@@ -432,8 +533,7 @@ export const ValidationMessage: Record<Language, ValidationMessageMap> = {
     [IS_INSTANCE]: (options: ValidationMessageArguments): string => {
       if (options.constraints[0]) {
         return `$property${options.each ? '中的每个值' : ''}必须是 ${options.constraints[0].name} 的一个实例`
-      }
-      else {
+      } else {
         return `isInstance 装饰器${options.each ? '中的每个值' : ''}都期望一个对象作为值，但得到的却是假值。`
       }
     },
@@ -634,8 +734,7 @@ export const ValidationMessage: Record<Language, ValidationMessageMap> = {
       const isMaxLength = options?.constraints[1] !== null && options?.constraints[1] !== undefined
       if (isMinLength && (!options.value || options.value.length < options?.constraints[0])) {
         return `$property${options.each ? '中的每个值' : ''}必须长于或等于 $constraint1 个字符`
-      }
-      else if (isMaxLength && options.value.length > options?.constraints[1]) {
+      } else if (isMaxLength && options.value.length > options?.constraints[1]) {
         return `$property${options.each ? '中的每个值' : ''}必须短于或等于 $constraint2 个字符`
       }
       return `$property${options.each ? '中的每个值' : ''}必须长于或等于 $constraint1 且短于或等于 $constraint2 个字符`

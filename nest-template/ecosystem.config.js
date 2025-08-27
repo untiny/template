@@ -12,7 +12,7 @@ module.exports = {
       env: {
         NODE_ENV: 'production', // 环境变量
         PORT: process.env.APP_PORT, // 端口号
-      }
+      },
     },
   ],
-};
+}

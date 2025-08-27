@@ -3,7 +3,6 @@ import { Controller, Get, Logger, Param } from '@nestjs/common'
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { ApiParam, ApiTags } from '@nestjs/swagger'
 import { RedisAdapter } from '@socket.io/redis-adapter'
-import { ClsService } from 'nestjs-cls'
 import { AppService } from './app.service'
 import { SocketGateway } from './socket/socket.gateway'
 
@@ -13,17 +12,13 @@ export class AppController {
   constructor(
     private readonly appService: AppService,
     private readonly socketGateway: SocketGateway,
-    private readonly cls: ClsService,
     private readonly eventEmitter: EventEmitter2,
     private readonly cache: Cache,
   ) {}
 
   @Get()
   async getHello() {
-    await this.cache.set('cache:test', `设置缓存的pid:${process.pid}`)
-    return {
-      message: 'Hello World!',
-    }
+    return this.appService.getHello()
   }
 
   @Get('setCache')
@@ -46,7 +41,10 @@ export class AppController {
     const redisAdapter = this.socketGateway.server.sockets.adapter as RedisAdapter
     const rooms = await redisAdapter.allRooms()
     const workerRooms = redisAdapter.rooms
-    Logger.log(`Pid: ${process.pid}, WorkerRooms: ${Array.from(workerRooms.keys())}, Rooms: ${Array.from(rooms.keys())}`, AppController.name)
+    Logger.log(
+      `Pid: ${process.pid}, WorkerRooms: ${Array.from(workerRooms.keys())}, Rooms: ${Array.from(rooms.keys())}`,
+      AppController.name,
+    )
     const sockets = await this.socketGateway.getRoomSocketIds(room)
     console.log(sockets)
 

@@ -29,7 +29,7 @@ export function i18nExceptionKey<K = I18nTranslations>(keyOrMessage: string): Pa
   return `exception.${keyOrMessage}` as Path<K>
 }
 
-export function formatI18nException<K = I18nTranslations>(message: string, i18n: I18nContext<K>): string {
+export function formatI18nException<K = I18nTranslations>(message: string, i18n?: I18nContext<K>): string {
   if (!i18n) {
     return message
   }

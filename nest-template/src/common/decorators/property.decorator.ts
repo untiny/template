@@ -2,13 +2,29 @@
 import { applyDecorators } from '@nestjs/common'
 import { ApiProperty, ApiPropertyOptions } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
-import { ArrayMaxSize, ArrayMinSize, IsDefined, isDefined, IsEnum, IsIn, IsOptional, Length, Matches, Max, MaxLength, Min, MinLength, ValidateNested, ValidationOptions } from 'class-validator'
+import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsDefined,
+  IsEnum,
+  IsIn,
+  IsOptional,
+  isDefined,
+  Length,
+  Matches,
+  Max,
+  MaxLength,
+  Min,
+  MinLength,
+  ValidateNested,
+  ValidationOptions,
+} from 'class-validator'
 import { isArray, isObject } from 'lodash'
 import { I18nPath } from 'src/generated/i18n'
 
 function getTypeIsArrayTuple(
   input: Function | [Function] | undefined | string | Record<string, any>,
-  isArrayFlag: boolean
+  isArrayFlag: boolean,
 ): [Function | undefined, boolean] {
   if (!input) {
     return [input as undefined, isArrayFlag]
@@ -64,7 +80,7 @@ export function Property(options?: PropertyOptions) {
   if (typeof type === 'function' && !isBasicType(type)) {
     decorators.push(
       Type(() => type),
-      ValidateNested({ ...validationOptions })
+      ValidateNested({ ...validationOptions }),
     )
   }
 
@@ -75,8 +91,7 @@ export function Property(options?: PropertyOptions) {
   }
   if (isArray(options.enum)) {
     decorators.push(IsIn(options.enum, { ...validationOptions }))
-  }
-  else if (typeof options.enum !== 'function' && isObject(options.enum)) {
+  } else if (typeof options.enum !== 'function' && isObject(options.enum)) {
     decorators.push(IsEnum(options.enum, { ...validationOptions }))
   }
 
@@ -93,8 +108,7 @@ export function Property(options?: PropertyOptions) {
   /** 字符串长度 */
   if (isDefined(options.maxLength) && isDefined(options.minLength)) {
     decorators.push(Length(options.minLength, options.maxLength, { ...validationOptions }))
-  }
-  else {
+  } else {
     if (isDefined(options.maxLength)) {
       decorators.push(MaxLength(options.maxLength, { ...validationOptions }))
     }

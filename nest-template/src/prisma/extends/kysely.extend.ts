@@ -1,4 +1,17 @@
-import { CompiledQuery, DatabaseConnection, DeleteQueryNode, Driver, InsertQueryNode, Kysely, MysqlAdapter, MysqlIntrospector, MysqlQueryCompiler, QueryResult, TransactionSettings, UpdateQueryNode } from 'kysely'
+import {
+  CompiledQuery,
+  DatabaseConnection,
+  DeleteQueryNode,
+  Driver,
+  InsertQueryNode,
+  Kysely,
+  MysqlAdapter,
+  MysqlIntrospector,
+  MysqlQueryCompiler,
+  QueryResult,
+  TransactionSettings,
+  UpdateQueryNode,
+} from 'kysely'
 import { DB } from 'src/generated/kysely'
 import { PrismaContext } from '../prisma.interface'
 
@@ -8,24 +21,16 @@ import { PrismaContext } from '../prisma.interface'
 export class PrismaConnection implements DatabaseConnection {
   constructor(private readonly prisma: PrismaContext) {}
 
-  async executeQuery<R>(
-    compiledQuery: CompiledQuery<unknown>,
-  ): Promise<QueryResult<R>> {
+  async executeQuery<R>(compiledQuery: CompiledQuery<unknown>): Promise<QueryResult<R>> {
     const { sql, parameters, query } = compiledQuery
 
     // Delete, update and insert queries return the number of affected rows if no returning clause is specified
-    const supportsReturning
-      = DeleteQueryNode.is(query)
-        || UpdateQueryNode.is(query)
-        || InsertQueryNode.is(query)
+    const supportsReturning = DeleteQueryNode.is(query) || UpdateQueryNode.is(query) || InsertQueryNode.is(query)
     const shouldReturnAffectedRows = supportsReturning && !query.returning
 
     // Execute the query with $executeRawUnsafe to get the number of affected rows
     if (shouldReturnAffectedRows) {
-      const numAffectedRows = BigInt(
-
-        await this.prisma.$executeRawUnsafe(sql, ...parameters),
-      )
+      const numAffectedRows = BigInt(await this.prisma.$executeRawUnsafe(sql, ...parameters))
       return {
         rows: [],
         numAffectedRows,
@@ -42,9 +47,7 @@ export class PrismaConnection implements DatabaseConnection {
     _compiledQuery: CompiledQuery<unknown>,
     _chunkSize?: number | undefined,
   ): AsyncIterableIterator<QueryResult<R>> {
-    throw new Error(
-      'prisma-extension-kysely does not support streaming queries',
-    )
+    throw new Error('prisma-extension-kysely does not support streaming queries')
   }
 }
 
@@ -57,10 +60,7 @@ export class PrismaDriver<T extends PrismaContext> implements Driver {
     return new PrismaConnection(this.prisma)
   }
 
-  async beginTransaction(
-    _connection: DatabaseConnection,
-    _settings: TransactionSettings,
-  ): Promise<void> {
+  async beginTransaction(_connection: DatabaseConnection, _settings: TransactionSettings): Promise<void> {
     throw new Error('prisma-extension-kysely does not support transactions')
   }
 
@@ -84,7 +84,7 @@ export function createKysely<T extends PrismaContext>(client: T) {
       createDriver: () => new PrismaDriver(client),
       // Don't forget to customize these to match your database!
       createAdapter: () => new MysqlAdapter(),
-      createIntrospector: db => new MysqlIntrospector(db),
+      createIntrospector: (db) => new MysqlIntrospector(db),
       createQueryCompiler: () => new MysqlQueryCompiler(),
     },
     plugins: [

@@ -49,9 +49,7 @@ export class UserService {
         id: isNil(query.after) ? 'desc' : 'asc',
       },
       cursor: isNil(cursor) ? undefined : { id: cursor },
-      skip: isNil(query.before || query.after)
-        ? undefined
-        : 1,
+      skip: isNil(query.before || query.after) ? undefined : 1,
       take: query.limit,
     })
     return users

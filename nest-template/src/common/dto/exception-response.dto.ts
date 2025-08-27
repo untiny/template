@@ -11,7 +11,7 @@ export class ExceptionResponseDto {
   @Property({ required: false, type: String, example: 'HttpException' })
   context?: string
 
-  constructor(message: string, status: HttpStatus, context?: string,) {
+  constructor(message: string, status: HttpStatus, context?: string) {
     this.message = message
     this.status = status
     this.context = context

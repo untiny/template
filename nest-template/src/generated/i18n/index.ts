@@ -2,44 +2,44 @@
 
 /* eslint-disable */
 /* prettier-ignore */
-import { Path } from "nestjs-i18n";
+import { Path } from 'nestjs-i18n'
 /* prettier-ignore */
 export type I18nTranslations = {
-    "exception": {
-        "Bad Gateway": string;
-        "Bad Request": string;
-        "Conflict": string;
-        "Forbidden": string;
-        "Gateway Timeout": string;
-        "Gone": string;
-        "HTTP Version Not Supported": string;
-        "I'm a teapot": string;
-        "Internal Server Error": string;
-        "Method Not Allowed": string;
-        "Misdirected": string;
-        "Not Acceptable": string;
-        "Not Found": string;
-        "Not Implemented": string;
-        "Payload Too Large": string;
-        "Precondition Failed": string;
-        "Request Timeout": string;
-        "Service Unavailable": string;
-        "Unauthorized": string;
-        "Unprocessable Entity": string;
-        "Unsupported Media Type": string;
-        "Unknown error": string;
-    };
-    "module": {
-        "user": {
-            "name": string;
-            "password": string;
-            "email": string;
-        };
-        "token": {
-            "access_token": string;
-            "refresh_token": string;
-        };
-    };
-};
+  exception: {
+    'Bad Gateway': string
+    'Bad Request': string
+    Conflict: string
+    Forbidden: string
+    'Gateway Timeout': string
+    Gone: string
+    'HTTP Version Not Supported': string
+    "I'm a teapot": string
+    'Internal Server Error': string
+    'Method Not Allowed': string
+    Misdirected: string
+    'Not Acceptable': string
+    'Not Found': string
+    'Not Implemented': string
+    'Payload Too Large': string
+    'Precondition Failed': string
+    'Request Timeout': string
+    'Service Unavailable': string
+    Unauthorized: string
+    'Unprocessable Entity': string
+    'Unsupported Media Type': string
+    'Unknown error': string
+  }
+  module: {
+    user: {
+      name: string
+      password: string
+      email: string
+    }
+    token: {
+      access_token: string
+      refresh_token: string
+    }
+  }
+}
 /* prettier-ignore */
-export type I18nPath = Path<I18nTranslations>;
+export type I18nPath = Path<I18nTranslations>

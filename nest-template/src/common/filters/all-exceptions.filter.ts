@@ -16,7 +16,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
     const i18n = getI18nContext(host)
     const status = this.getStatus(exception) ?? HttpStatus.INTERNAL_SERVER_ERROR
-    const message = formatI18nException(this.getMessage(exception), i18n!) as string
+    const message = formatI18nException(this.getMessage(exception), i18n) as string
     const stack = exception instanceof Error ? exception.stack : undefined
     const context = exception instanceof Error ? exception.constructor.name : AllExceptionsFilter.name
     const exceptionResponse = new ExceptionResponseDto(message, status, context)
@@ -80,13 +80,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
     return throwError(() => exceptionResponse)
   }
 
-  logger(params: ExceptionResponseDto & {
-    type?: string
-    path?: string
-    method?: string
-    stack?: string
-    [key: string]: any
-  }) {
+  logger(
+    params: ExceptionResponseDto & {
+      type?: string
+      path?: string
+      method?: string
+      stack?: string
+      [key: string]: any
+    },
+  ) {
     const { stack, ...optionalParams } = params
     if (params.status >= HttpStatus.INTERNAL_SERVER_ERROR) {
       return Logger.error(optionalParams, stack)
@@ -98,47 +100,40 @@ export class AllExceptionsFilter implements ExceptionFilter {
     let message: string | undefined
     if (typeof exception === 'string') {
       message = exception
-    }
-    else if (exception instanceof HttpException) {
+    } else if (exception instanceof HttpException) {
       const error = exception.getResponse()
       if (typeof error === 'string') {
         message = error
-      }
-      else if (isObject(error) && error !== null) {
+      } else if (isObject(error) && error !== null) {
         message = Reflect.get(error, 'message')
-      }
-      else {
+      } else {
         message = exception.message
       }
-    }
-    else if (exception instanceof WsException || exception instanceof RpcException) {
+    } else if (exception instanceof WsException || exception instanceof RpcException) {
       const error = exception.getError()
       message = typeof error === 'string' ? error : Reflect.get(error, 'message')
-    }
-    else if (
-      exception instanceof Prisma.PrismaClientValidationError
-      || exception instanceof Prisma.PrismaClientKnownRequestError
-      || exception instanceof Prisma.PrismaClientUnknownRequestError
+    } else if (
+      exception instanceof Prisma.PrismaClientValidationError ||
+      exception instanceof Prisma.PrismaClientKnownRequestError ||
+      exception instanceof Prisma.PrismaClientUnknownRequestError
     ) {
       const { code, meta } = exception as Prisma.PrismaClientKnownRequestError
       const messages = [
         exception.name,
         code,
         meta?.modelName,
-        exception.message.split('\n').pop(), // Prisma 得异常信息都是包括有代码的，只有最后一行才是人类可读的
+        exception.message
+          .split('\n')
+          .pop(), // Prisma 得异常信息都是包括有代码的，只有最后一行才是人类可读的
       ]
       message = messages.filter(Boolean).join(' ')
-    }
-    else if (exception instanceof Error) {
+    } else if (exception instanceof Error) {
       message = exception.message
-    }
-    else if (isArray(exception)) {
+    } else if (isArray(exception)) {
       message = exception.join(';\n')
-    }
-    else if (isObject(exception) && exception !== null) {
+    } else if (isObject(exception) && exception !== null) {
       message = Reflect.get(exception, 'message')
-    }
-    else {
+    } else {
       message = JSON.stringify(exception)
     }
     if (isArray(message)) {

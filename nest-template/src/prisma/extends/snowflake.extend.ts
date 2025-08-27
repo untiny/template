@@ -13,8 +13,7 @@ function createSnowflakeId<T extends CreateArgs>(args: T): T {
       }
       return item
     })
-  }
-  else if (isDefined(args.data) && !isDefined(args.data.id)) {
+  } else if (isDefined(args.data) && !isDefined(args.data.id)) {
     args.data.id = generateSnowflakeId()
   }
   return args

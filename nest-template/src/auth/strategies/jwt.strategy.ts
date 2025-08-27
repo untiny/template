@@ -7,13 +7,11 @@ import { AuthStrategy } from '../auth.constant'
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, AuthStrategy.JWT) {
-  constructor(
-    private readonly configService: ConfigService<Env>,
-  ) {
+  constructor(readonly configService: ConfigService<Env>) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.getOrThrow<string>('JWT_ACCESS_SECRET')!,
+      secretOrKey: configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
     })
   }
 

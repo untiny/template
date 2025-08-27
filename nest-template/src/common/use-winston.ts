@@ -1,6 +1,6 @@
-import type { LoggerService } from '@nestjs/common'
 import { hash } from 'node:crypto'
 import { sep } from 'node:path'
+import type { LoggerService } from '@nestjs/common'
 import { Cache, createCache } from 'cache-manager'
 import { isDefined } from 'class-validator'
 import { blue, cyan, gray, green, magenta, red, yellow } from 'kolorist'
@@ -17,31 +17,33 @@ function joinLine(...items: string[]) {
   return items.join('')
 }
 
-function formatStack(stack: string, message: string, options?: {
-  colors?: boolean
-  paths?: boolean
-}) {
+function formatStack(
+  stack: string,
+  message: string,
+  options?: {
+    colors?: boolean
+    paths?: boolean
+  },
+) {
   let lines = stack
     .split('\n')
     .splice(message.split('\n').length)
-    .map(l => l.trim())
+    .map((l) => l.trim())
 
   if (options?.paths) {
     const cwd = process.cwd() + sep
-    lines = lines.map(l => l.replace('file://', '').replace(cwd, ''))
+    lines = lines.map((l) => l.replace('file://', '').replace(cwd, ''))
   }
 
   // 格式化堆栈信息
-  lines = lines.map(
-    (line) => {
-      return joinLine(
-        SPACE.repeat(4),
-        line
-          .replace(/^at +/, m => options?.colors ? gray(m) : m)
-          .replace(/\((.+)\)/, (_, m) => `(${options?.colors ? cyan(m as string) : m})`)
-      )
-    }
-  )
+  lines = lines.map((line) => {
+    return joinLine(
+      SPACE.repeat(4),
+      line
+        .replace(/^at +/, (m) => (options?.colors ? gray(m) : m))
+        .replace(/\((.+)\)/, (_, m) => `(${options?.colors ? cyan(m as string) : m})`),
+    )
+  })
 
   return `\n${lines.join('\n')}\n`
 }
@@ -168,10 +170,12 @@ function consolePrintf(appName?: string) {
 
     // 组装堆栈信息
     if (!isEmpty(stack)) {
-      messages.push(formatStack(String(stack), String(message), {
-        colors: true,
-        paths: true,
-      }))
+      messages.push(
+        formatStack(String(stack), String(message), {
+          colors: true,
+          paths: true,
+        }),
+      )
     }
 
     // 组装请求信息
@@ -295,14 +299,14 @@ export function useWinston(): LoggerService {
     format: format.combine(
       format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
       format.errors({ stack: true }),
-      formatLog()
+      formatLog(),
     ),
     transports: [
       new transports.Console({
         format: format.combine(
           format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
           format.ms(),
-          consolePrintf(process?.env?.APP_NAME ?? 'Nest')
+          consolePrintf(process?.env?.APP_NAME ?? 'Nest'),
         ),
       }),
       new transports.DailyRotateFile({

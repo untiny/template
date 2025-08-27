@@ -1,7 +1,7 @@
-import type { NestExpressApplication } from '@nestjs/platform-express'
 import { networkInterfaces } from 'node:os'
 import { Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import type { NestExpressApplication } from '@nestjs/platform-express'
 import { Env } from 'src/generated/env'
 
 // 获取当前设备的IP地址
@@ -9,8 +9,8 @@ export function ips(): string[] {
   const nets = networkInterfaces()
   const ips = Object.values(nets)
     .flat()
-    .filter(net => net?.family === 'IPv4' && !net.internal && net?.address)
-    .map(net => net?.address)
+    .filter((net) => net?.family === 'IPv4' && !net.internal && net?.address)
+    .map((net) => net?.address)
   return ips as string[]
 }
 

@@ -2,14 +2,15 @@ import { Logger, ValidationError } from '@nestjs/common'
 import { getMetadataStorage, ValidationArguments } from 'class-validator'
 import { ValidationMetadata } from 'class-validator/types/metadata/ValidationMetadata'
 import { uniq } from 'lodash'
-import { getValidationBuildMessage, ValidationMessageArguments, ValidationMethod } from '../constants/validation-message.constant'
+import {
+  getValidationBuildMessage,
+  ValidationMessageArguments,
+  ValidationMethod,
+} from '../constants/validation-message.constant'
 import { Language } from '../enums/language.enum'
 import { getPropertyTitle } from './swagger-metadata.util'
 
-function prependConstraintsWithParentProp(
-  parentPath: string,
-  error: ValidationError,
-): ValidationError {
+function prependConstraintsWithParentProp(parentPath: string, error: ValidationError): ValidationError {
   const constraints = {}
   for (const key in error.constraints) {
     constraints[key] = `${parentPath}.${error.constraints[key]}`
@@ -17,59 +18,41 @@ function prependConstraintsWithParentProp(
   return { ...error, constraints }
 }
 
-function mapChildrenToValidationErrors(
-  error: ValidationError,
-  parentPath?: string,
-): ValidationError[] {
-  if (!(error.children && error.children.length)) {
+function mapChildrenToValidationErrors(error: ValidationError, parentPath?: string): ValidationError[] {
+  if (!error.children?.length) {
     return [error]
   }
   const validationErrors: ValidationError[] = []
-  parentPath = parentPath
-    ? `${parentPath}.${error.property}`
-    : error.property
+  parentPath = parentPath ? `${parentPath}.${error.property}` : error.property
   for (const item of error.children) {
-    if (item.children && item.children.length) {
-      validationErrors.push(
-        ...mapChildrenToValidationErrors(item, parentPath),
-      )
+    if (item.children?.length) {
+      validationErrors.push(...mapChildrenToValidationErrors(item, parentPath))
     }
-    validationErrors.push(
-      prependConstraintsWithParentProp(parentPath, item),
-    )
+    validationErrors.push(prependConstraintsWithParentProp(parentPath, item))
   }
   return validationErrors
 }
 
-function flattenValidationErrors(
-  validationErrors: ValidationError[],
-): string[] {
+function flattenValidationErrors(validationErrors: ValidationError[]): string[] {
   const messages = validationErrors
-    .flatMap(error => mapChildrenToValidationErrors(error))
-    .filter(item => !!item.constraints)
-    .flatMap(item => Object.values(item.constraints!).filter(item => !!item))
+    .flatMap((error) => mapChildrenToValidationErrors(error))
+    .filter((item) => !!item.constraints)
+    .flatMap((item) => Object.values(item.constraints ?? {}).filter((item) => !!item))
   return uniq(messages)
 }
 
-function getValidationMetadata(
-  target: object,
-  property: string,
-) {
+function getValidationMetadata(target: object, property: string) {
   const storage = getMetadataStorage()
-  const metadatas = storage
-    .getTargetValidationMetadatas(
-      target.constructor,
-      target.constructor.name,
-      true,
-      false,
-    )
+  const metadatas = storage.getTargetValidationMetadatas(target.constructor, target.constructor.name, true, false)
 
   const result: { [key: string]: ValidationMetadata } = {}
-  metadatas.filter(metadata => metadata.propertyName === property).forEach((metadata) => {
-    if (metadata.name) {
-      result[metadata.name] = metadata
-    }
-  })
+  metadatas
+    .filter((metadata) => metadata.propertyName === property)
+    .forEach((metadata) => {
+      if (metadata.name) {
+        result[metadata.name] = metadata
+      }
+    })
   return result
 }
 
@@ -87,13 +70,12 @@ function constraintToString(constraint: unknown): string {
 
 function replaceMessageSpecialTokens(
   message: string | ((args: ValidationArguments) => string),
-  validationArguments: ValidationArguments
+  validationArguments: ValidationArguments,
 ): string {
   let messageString: string = ''
   if (typeof message === 'function') {
     messageString = (message as (args: ValidationArguments) => string)(validationArguments)
-  }
-  else if (typeof message === 'string') {
+  } else if (typeof message === 'string') {
     messageString = message
   }
 
@@ -101,23 +83,21 @@ function replaceMessageSpecialTokens(
     validationArguments.constraints.forEach((constraint, index) => {
       messageString = messageString.replace(
         new RegExp(`\\$constraint${index + 1}`, 'g'),
-        constraintToString(constraint)
+        constraintToString(constraint),
       )
     })
   }
 
   if (
-    messageString
-    && validationArguments.value !== undefined
-    && validationArguments.value !== null
-    && ['string', 'boolean', 'number'].includes(typeof validationArguments.value)
+    messageString &&
+    validationArguments.value !== undefined &&
+    validationArguments.value !== null &&
+    ['string', 'boolean', 'number'].includes(typeof validationArguments.value)
   ) {
     messageString = messageString.replace(/\$value/g, validationArguments.value as string)
   }
-  if (messageString)
-    messageString = messageString.replace(/\$property/g, validationArguments.property)
-  if (messageString)
-    messageString = messageString.replace(/\$target/g, validationArguments.targetName)
+  if (messageString) messageString = messageString.replace(/\$property/g, validationArguments.property)
+  if (messageString) messageString = messageString.replace(/\$target/g, validationArguments.targetName)
 
   return messageString
 }
@@ -127,22 +107,22 @@ function formatValidationErrors(validationErrors: ValidationError[], language: L
     if (error.children && error.children.length > 0) {
       error.children = formatValidationErrors(error.children, language)
     }
-    const target = error.target! as object
+    const target = error.target as object
     const validationMetadata = getValidationMetadata(target, error.property)
     const propertyTitle = getPropertyTitle(target, error.property, language)
     error.property = propertyTitle ?? error.property // 替换错误消息中的属性名称
     error.constraints = error.constraints ?? {}
     for (const key in error.constraints) {
       if (
-        error.constraints[key] === '' // dismissDefaultMessages: true
-        || error.constraints[key].endsWith(' must be either object or array')
-        || error.constraints[key].startsWith('each value in nested property ')
+        error.constraints[key] === '' || // dismissDefaultMessages: true
+        error.constraints[key].endsWith(' must be either object or array') ||
+        error.constraints[key].startsWith('each value in nested property ')
       ) {
         const metadata = validationMetadata[key]
         if (metadata?.constraints) {
           metadata.constraints = metadata.constraints.map((constraint) => {
             // 判断constraint是否为error.target的属性，是则替换为属性名称, 否则返回原字符串
-            if (typeof constraint === 'string' && Object.prototype.hasOwnProperty.call(target, constraint)) {
+            if (typeof constraint === 'string' && Object.hasOwn(target, constraint)) {
               // 对于自定义验证的时候或许有用
               const propertyTitle = getPropertyTitle(target, error.property, language)
               return propertyTitle ?? constraint
@@ -181,17 +161,21 @@ export function formatValidationErrorMessage(errors: ValidationError[], language
 export function formatValidationMethodErrorMessage(
   method: ValidationMethod,
   property: string,
-  language?: Language
+  language?: Language,
 ): string
 export function formatValidationMethodErrorMessage(
   method: ValidationMethod,
-  property: Omit<ValidationMessageArguments, | 'object' | 'targetName' | 'constraints' | 'value'> & Partial<ValidationMessageArguments>,
-  language?: Language
+  property: Omit<ValidationMessageArguments, 'object' | 'targetName' | 'constraints' | 'value'> &
+    Partial<ValidationMessageArguments>,
+  language?: Language,
 ): string
 export function formatValidationMethodErrorMessage(
   method: ValidationMethod,
-  property: string | Omit<ValidationMessageArguments, | 'object' | 'targetName' | 'constraints' | 'value'> & Partial<ValidationMessageArguments>,
-  language: Language = Language.ZH
+  property:
+    | string
+    | (Omit<ValidationMessageArguments, 'object' | 'targetName' | 'constraints' | 'value'> &
+        Partial<ValidationMessageArguments>),
+  language: Language = Language.ZH,
 ): string {
   const args: ValidationMessageArguments = {
     object: {},

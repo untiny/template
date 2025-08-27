@@ -9,10 +9,7 @@ const logger = consola.withTag('generate-env-type')
 function generateEnvType() {
   logger.start('Generating env type...')
   const dir = process.cwd()
-  const targets = [
-    '.env',
-    `.env.${process.env.NODE_ENV || 'development'}`,
-  ]
+  const targets = ['.env', `.env.${process.env.NODE_ENV ?? 'development'}`]
 
   const env: Record<string, string> = {}
   for (const target of targets) {
