@@ -15,6 +15,7 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        registerPlugin(ClickSoundPlugin.class);
         super.onCreate(savedInstanceState);
 
         try {

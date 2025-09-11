@@ -57,7 +57,7 @@ export default defineConfig((config) => {
   return {
     plugins,
     build: {
-      // outDir: 'harmony/entry/src/main/resources/rawfile/public',
+      // outDir: 'harmonyos/entry/src/main/resources/rawfile/public',
       emptyOutDir: true,
       assetsInlineLimit: 0, // 设置为0禁用将较小资源转 base64 编码
       rollupOptions: {

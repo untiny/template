@@ -11,5 +11,6 @@ export default antfu({
   ],
   rules: {
     'no-console': 'warn',
+    'vue/no-deprecated-slot-attribute': 'off',
   },
 })

@@ -3,8 +3,9 @@ import { IonicVue } from '@ionic/vue'
 import { SafeArea } from '@untiny/capacitor-safe-area'
 import { createApp } from 'vue'
 import App from './App.vue'
-import router from './router'
+import { ClickSound } from './plugins/click-sound.plugin'
 
+import router from './router'
 import '@ionic/vue/css/core.css'
 import '@ionic/vue/css/display.css'
 import '@ionic/vue/css/flex-utils.css'
@@ -41,6 +42,24 @@ async function bootstrap() {
   app.use(router)
 
   await router.isReady()
+
+  const clickSounds: (keyof HTMLElementTagNameMap)[] = [
+    'ion-button',
+    'button',
+    'input',
+    'textarea',
+    'ion-item.ion-activatable' as any,
+    'ion-radio',
+    'ion-checkbox',
+    'ion-toggle',
+  ]
+
+  document.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement
+    if (target.closest(clickSounds.join(','))) {
+      ClickSound.play()
+    }
+  }, true)
 
   app.mount('#app')
 }

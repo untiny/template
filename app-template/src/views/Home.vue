@@ -50,13 +50,9 @@ async function test() {
               --padding-end: 1rem;
             "
           >
-            <template #end>
-              <div>
-                <ion-button size="small" @click="test">
-                  OK
-                </ion-button>
-              </div>
-            </template>
+            <ion-button slot="end" size="small" @click="test">
+              OK
+            </ion-button>
           </ion-input>
         </div>
         <div class="bg-white rounded-2xl p-4 col-span-2 row-span-2">
@@ -68,9 +64,7 @@ async function test() {
           mode="ios"
           color="tertiary"
         >
-          <template #start>
-            <ion-icon :icon="viteIcon" />
-          </template>
+          <ion-icon slot="start" :icon="viteIcon" />
           <span>Untiny</span>
         </ion-button>
         <ion-button
@@ -78,31 +72,51 @@ async function test() {
           class="bg-white rounded-2xl col-span-2 row-span-1 m-0"
           mode="ios"
           color="warning"
+          disabled
         >
-          <template #start>
-            <ion-icon :icon="vueIcon" />
-          </template>
+          <ion-icon slot="start" :icon="vueIcon" />
           <span>Untiny</span>
         </ion-button>
         <div class="bg-white rounded-2xl py-4 col-span-4">
-          <ion-item lines="none" mode="ios">
+          <ion-item lines="none" mode="ios" button disabled>
             <ion-label>platform</ion-label>
-            <template #end>
-              <ion-note>{{ platform }}</ion-note>
-            </template>
+            <ion-note slot="end">
+              {{ platform }}
+            </ion-note>
+          </ion-item>
+          <ion-item lines="none" mode="ios" button>
+            <ion-label>Label</ion-label>
+            <ion-note slot="end">
+              Value
+            </ion-note>
           </ion-item>
           <ion-item lines="none" mode="ios">
             <ion-label>Label</ion-label>
-            <template #end>
-              <ion-note>Value</ion-note>
-            </template>
+            <ion-note slot="end">
+              Value
+            </ion-note>
           </ion-item>
-          <ion-item lines="none" mode="ios">
-            <ion-label>Label</ion-label>
-            <template #end>
-              <ion-note>Value</ion-note>
-            </template>
-          </ion-item>
+        </div>
+        <div class="bg-white rounded-2xl py-4 col-span-4">
+          <ion-radio-group value="strawberries">
+            <ion-radio value="grapes" disabled>
+              Grapes
+            </ion-radio><br>
+            <ion-radio value="strawberries">
+              Strawberries
+            </ion-radio><br>
+            <ion-radio value="pineapple">
+              Pineapple
+            </ion-radio><br>
+            <ion-radio value="cherries">
+              Cherries
+            </ion-radio>
+          </ion-radio-group>
+        </div>
+
+        <div class="bg-white rounded-2xl py-4 col-span-4">
+          <ion-checkbox>I agree to the terms and conditions</ion-checkbox>
+          <ion-toggle>Default Toggle</ion-toggle>
         </div>
       </div>
     </ion-content>
