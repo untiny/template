@@ -31,10 +31,10 @@ importers:
         version: 7.0.1(@capacitor/core@7.4.2)
       '@ionic/vue':
         specifier: ^8.6.5
-        version: 8.6.5(@stencil/core@4.33.1)(vue-router@4.5.1(vue@3.5.17(typescript@5.8.3)))(vue@3.5.17(typescript@5.8.3))
+        version: 8.6.5(@stencil/core@4.37.0)(vue-router@4.5.1(vue@3.5.17(typescript@5.8.3)))(vue@3.5.17(typescript@5.8.3))
       '@ionic/vue-router':
         specifier: ^8.6.5
-        version: 8.6.5(@stencil/core@4.33.1)(vue-router@4.5.1(vue@3.5.17(typescript@5.8.3)))(vue@3.5.17(typescript@5.8.3))
+        version: 8.6.5(@stencil/core@4.37.0)(vue-router@4.5.1(vue@3.5.17(typescript@5.8.3)))(vue@3.5.17(typescript@5.8.3))
       '@tailwindcss/vite':
         specifier: ^4.1.11
         version: 4.1.11(vite@7.0.5(@types/node@22.13.7)(jiti@2.4.2)(lightningcss@1.30.1)(yaml@2.8.0))
@@ -47,6 +47,9 @@ importers:
       '@vueuse/integrations':
         specifier: ^13.5.0
         version: 13.5.0(qrcode@1.5.4)(vue@3.5.17(typescript@5.8.3))
+      ionicons:
+        specifier: ^8.0.13
+        version: 8.0.13
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -698,6 +701,11 @@ packages:
 
   '@stencil/core@4.33.1':
     resolution: {integrity: sha512-12k9xhAJBkpg598it+NRmaYIdEe6TSnsL/v6/KRXDcUyTK11VYwZQej2eHnMWtqot+znJ+GNTqb5YbiXi+5Low==}
+    engines: {node: '>=16.0.0', npm: '>=7.10.0'}
+    hasBin: true
+
+  '@stencil/core@4.37.0':
+    resolution: {integrity: sha512-dSSTrRp9jFp2oIWoDgUco/ZhXodxxK2fgk/C+l0orfkg2/R/cPK77s7R+oeCiPvEpmYuoptK8jaehATdhminjA==}
     engines: {node: '>=16.0.0', npm: '>=7.10.0'}
     hasBin: true
 
@@ -1754,6 +1762,9 @@ packages:
 
   ionicons@7.4.0:
     resolution: {integrity: sha512-ZK94MMqgzMCPPMhmk8Ouu6goyVHFIlw/ACP6oe3FrikcI0N7CX0xcwVaEbUc0G/v3W0shI93vo+9ve/KpvcNhQ==}
+
+  ionicons@8.0.13:
+    resolution: {integrity: sha512-2QQVyG2P4wszne79jemMjWYLp0DBbDhr4/yFroPCxvPP1wtMxgdIV3l5n+XZ5E9mgoXU79w7yTWpm2XzJsISxQ==}
 
   is-binary-path@2.1.0:
     resolution: {integrity: sha512-ZMERYes6pDydyuGidse7OsHxtbI7WVeUEozgR/g7rd0xUimYNlvZRE/K2MgZTjWy725IfelLeVcEM97mmtRGXw==}
@@ -3173,18 +3184,18 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@ionic/vue-router@8.6.5(@stencil/core@4.33.1)(vue-router@4.5.1(vue@3.5.17(typescript@5.8.3)))(vue@3.5.17(typescript@5.8.3))':
+  '@ionic/vue-router@8.6.5(@stencil/core@4.37.0)(vue-router@4.5.1(vue@3.5.17(typescript@5.8.3)))(vue@3.5.17(typescript@5.8.3))':
     dependencies:
-      '@ionic/vue': 8.6.5(@stencil/core@4.33.1)(vue-router@4.5.1(vue@3.5.17(typescript@5.8.3)))(vue@3.5.17(typescript@5.8.3))
+      '@ionic/vue': 8.6.5(@stencil/core@4.37.0)(vue-router@4.5.1(vue@3.5.17(typescript@5.8.3)))(vue@3.5.17(typescript@5.8.3))
     transitivePeerDependencies:
       - '@stencil/core'
       - vue
       - vue-router
 
-  '@ionic/vue@8.6.5(@stencil/core@4.33.1)(vue-router@4.5.1(vue@3.5.17(typescript@5.8.3)))(vue@3.5.17(typescript@5.8.3))':
+  '@ionic/vue@8.6.5(@stencil/core@4.37.0)(vue-router@4.5.1(vue@3.5.17(typescript@5.8.3)))(vue@3.5.17(typescript@5.8.3))':
     dependencies:
       '@ionic/core': 8.6.5
-      '@stencil/vue-output-target': 0.10.7(@stencil/core@4.33.1)(vue-router@4.5.1(vue@3.5.17(typescript@5.8.3)))(vue@3.5.17(typescript@5.8.3))
+      '@stencil/vue-output-target': 0.10.7(@stencil/core@4.37.0)(vue-router@4.5.1(vue@3.5.17(typescript@5.8.3)))(vue@3.5.17(typescript@5.8.3))
       ionicons: 7.4.0
     transitivePeerDependencies:
       - '@stencil/core'
@@ -3331,11 +3342,22 @@ snapshots:
       '@rollup/rollup-win32-arm64-msvc': 4.34.9
       '@rollup/rollup-win32-x64-msvc': 4.34.9
 
-  '@stencil/vue-output-target@0.10.7(@stencil/core@4.33.1)(vue-router@4.5.1(vue@3.5.17(typescript@5.8.3)))(vue@3.5.17(typescript@5.8.3))':
+  '@stencil/core@4.37.0':
+    optionalDependencies:
+      '@rollup/rollup-darwin-arm64': 4.34.9
+      '@rollup/rollup-darwin-x64': 4.34.9
+      '@rollup/rollup-linux-arm64-gnu': 4.34.9
+      '@rollup/rollup-linux-arm64-musl': 4.34.9
+      '@rollup/rollup-linux-x64-gnu': 4.34.9
+      '@rollup/rollup-linux-x64-musl': 4.34.9
+      '@rollup/rollup-win32-arm64-msvc': 4.34.9
+      '@rollup/rollup-win32-x64-msvc': 4.34.9
+
+  '@stencil/vue-output-target@0.10.7(@stencil/core@4.37.0)(vue-router@4.5.1(vue@3.5.17(typescript@5.8.3)))(vue@3.5.17(typescript@5.8.3))':
     dependencies:
       vue: 3.5.17(typescript@5.8.3)
     optionalDependencies:
-      '@stencil/core': 4.33.1
+      '@stencil/core': 4.37.0
       vue-router: 4.5.1(vue@3.5.17(typescript@5.8.3))
 
   '@stylistic/eslint-plugin@5.2.0(eslint@9.31.0(jiti@2.4.2))':
@@ -4426,6 +4448,10 @@ snapshots:
   ionicons@7.4.0:
     dependencies:
       '@stencil/core': 4.27.1
+
+  ionicons@8.0.13:
+    dependencies:
+      '@stencil/core': 4.37.0
 
   is-binary-path@2.1.0:
     dependencies:
