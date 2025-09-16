@@ -24,12 +24,30 @@ onMounted(() => {
         <ion-title>{{ channelId }}</ion-title>
       </ion-toolbar>
     </ion-header>
-    <ion-content fullscreen class="ion-padding" style="--background: url('/bg.png'), url('/bg-color.png') center center/cover repeat;">
+    <ion-content fullscreen style="--background: url('/bg.png'), url('/bg-color.png') center center/cover repeat;">
       <!--  -->
-      <div v-for="i in 100" :key="i">
-        <h1>Page A</h1>
-        <p>Count: {{ count }}</p>
-      </div>
+
+      <ion-list style="--ion-item-background: transparent">
+        <ion-item
+          v-for="i in 100"
+          :key="i" button lines="none"
+        >
+          <ion-avatar :slot="i % 2 ? 'start' : 'end'" class="w-9.5 h-9.5" style="--border-radius: 0.5rem">
+            <img alt="Silhouette of a person's head" src="/avatar.jpeg">
+          </ion-avatar>
+          <ion-label>
+            <!-- <h3>Untiny</h3> -->
+            <div class="bg-white py-2 px-4 rounded-lg w-fit line-height-loose " :class="i % 2 ? 'mr-auto' : 'ml-auto'">
+              <p>Are you OK?</p>
+            </div>
+          </ion-label>
+        </ion-item>
+      </ion-list>
     </ion-content>
+    <ion-footer class="ion-no-border" translucent>
+      <ion-toolbar>
+        <ion-title>{{ channelId }}</ion-title>
+      </ion-toolbar>
+    </ion-footer>
   </ion-page>
 </template>

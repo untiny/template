@@ -12,7 +12,8 @@ html {
 }
 
 ion-tab-bar.tab-bar-translucent,
-ion-header.header-translucent-md ion-toolbar {
+ion-header.header-translucent-md ion-toolbar,
+ion-footer.footer-translucent-md ion-toolbar {
   --opacity: 0.8;
   --background: #f8f8f8;
   backdrop-filter: saturate(210%) blur(20px);
