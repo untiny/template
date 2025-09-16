@@ -7,7 +7,7 @@ async function onChat(i: number) {
 
 const { width } = useWindowSize()
 
-const chatMaxWidth = computed(() => width.value - 340)
+const chatMaxWidth = computed(() => width.value - 390)
 </script>
 
 <template>
@@ -49,3 +49,9 @@ const chatMaxWidth = computed(() => width.value - 340)
     </ion-split-pane>
   </ion-page>
 </template>
+
+<style lang="css">
+ion-content::shadow::part(background)::before {
+  content: "";
+}
+</style>

@@ -24,10 +24,12 @@ onMounted(() => {
         <ion-title>{{ channelId }}</ion-title>
       </ion-toolbar>
     </ion-header>
-    <ion-content color="light" fullscreen class="ion-padding">
+    <ion-content fullscreen class="ion-padding" style="--background: url('/bg.png'), url('/bg-color.png') center center/cover repeat;">
       <!--  -->
-      <h1>Page A</h1>
-      <p>Count: {{ count }}</p>
+      <div v-for="i in 100" :key="i">
+        <h1>Page A</h1>
+        <p>Count: {{ count }}</p>
+      </div>
     </ion-content>
   </ion-page>
 </template>
