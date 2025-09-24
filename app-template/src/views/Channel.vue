@@ -1,6 +1,6 @@
 <script lang="ts" setup>
+import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
 import { arrowBackOutline } from 'ionicons/icons'
-import AstronautJSON from '@/assets/qlottie/2/6/6.json'
 
 defineProps<{ channelId: string }>()
 
@@ -28,12 +28,13 @@ onMounted(() => {
     </ion-header>
     <ion-content fullscreen style="--background: url('/bg.png'), url('/bg-color.png') center center/cover repeat;">
       <!--  -->
-      <lottie
-        v-for="i in 2"
+      <DotLottieVue
+        v-for="i in 45"
         :key="i"
-        :animation-data="AstronautJSON"
+        class="w-32 h-32" autoplay loop :src="`/qlottie/1/${i}/${i}.json`"
       />
-      <ion-list style="--ion-item-background: transparent">
+
+      <!-- <ion-list style="--ion-item-background: transparent">
         <ion-item
           v-for="i in 10"
           :key="i" button lines="none"
@@ -42,13 +43,13 @@ onMounted(() => {
             <img alt="Silhouette of a person's head" src="/avatar.jpeg">
           </ion-avatar>
           <ion-label>
-            <!-- <h3>Untiny</h3> -->
+            <h3>Untiny</h3>
             <div class="bg-white px-4 rounded-lg w-fit leading-10 " :class="i % 2 ? 'mr-auto' : 'ml-auto'">
               Are you OK? <img width="16" src="/apng/s311.png" alt="">
             </div>
           </ion-label>
         </ion-item>
-      </ion-list>
+      </ion-list> -->
     </ion-content>
     <ion-footer class="ion-no-border" translucent>
       <ion-toolbar>
