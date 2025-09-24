@@ -30,6 +30,7 @@
     "@vueuse/integrations": "^13.5.0",
     "ionicons": "^8.0.13",
     "lodash": "^4.17.21",
+    "lottie-web": "^5.13.0",
     "pinia": "^3.0.3",
     "qrcode": "^1",
     "tailwindcss": "^4.1.11",
