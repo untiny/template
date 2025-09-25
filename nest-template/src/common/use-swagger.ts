@@ -1,10 +1,8 @@
-import type { INestApplication } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import type { NestExpressApplication } from '@nestjs/platform-express'
+import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import type { OpenAPIObject } from '@nestjs/swagger'
 import { DocumentBuilder, getSchemaPath, SwaggerModule } from '@nestjs/swagger'
 import { apiReference } from '@scalar/nestjs-api-reference'
-import type { Request, Response } from 'express'
 import { Env } from 'src/generated/env'
 import { OpenAPISchema } from './utils'
 
@@ -23,13 +21,12 @@ OpenAPISchema.set('TimezoneEnum', {
 class ScalarModule {
   static setup(
     path: string,
-    app: INestApplication,
+    app: NestFastifyApplication,
     document: OpenAPIObject,
     metaData?: { title?: string; description?: string },
   ) {
-    app.use(`/${path}-json`, (_req: Request, res: Response) => {
-      res.type('application/json')
-      res.send(document)
+    app.getHttpAdapter().get(`/${path}-json`, (_, reply) => {
+      reply.status(200).type('application/json').send(document)
     })
 
     app.use(
@@ -47,12 +44,13 @@ class ScalarModule {
         },
         persistAuth: true,
         defaultOpenAllTags: false,
+        withFastify: true,
       }),
     )
   }
 }
 
-export async function useSwagger(app: NestExpressApplication) {
+export async function useSwagger(app: NestFastifyApplication) {
   const configService = app.get<ConfigService<Env>>(ConfigService)
   const path = configService.get<string>('SWAGGER_DOCS_PATH', 'api-docs')
   const title = configService.get<string>('SWAGGER_DOCS_TITLE', 'API Reference')

@@ -17,10 +17,10 @@ declare module 'nestjs-cls' {
   }
 }
 
-declare module 'express' {
-  interface Request {
-    user: RequestUser
-  }
-}
+// declare module 'fastify' {
+//   interface FastifyRequest {
+//     user?: RequestUser
+//   }
+// }
 
 export {}

@@ -1,6 +1,6 @@
 import type { ExecutionContext } from '@nestjs/common'
 import { createParamDecorator } from '@nestjs/common'
-import type { Request } from 'express'
+import { FastifyRequest } from 'fastify'
 
 export const AuthUser = createParamDecorator((key: keyof RequestUser, ctx: ExecutionContext) => {
   let user: RequestUser | null = null
@@ -8,8 +8,8 @@ export const AuthUser = createParamDecorator((key: keyof RequestUser, ctx: Execu
   switch (ctx.getType()) {
     case 'http': {
       const context = ctx.switchToHttp()
-      const request = context.getRequest<Request>()
-      user = request.user as RequestUser
+      const request = context.getRequest<FastifyRequest>()
+      user = (request as any).user as RequestUser
       break
     }
     case 'ws':

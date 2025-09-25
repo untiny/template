@@ -2,7 +2,7 @@ import { join } from 'node:path'
 import { Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
-import type { NestExpressApplication } from '@nestjs/platform-express'
+import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import { AppModule } from './app.module'
 import { useServerUrl } from './common/use-server-url'
 import { useSwagger } from './common/use-swagger'
@@ -11,18 +11,21 @@ import { Env } from './generated/env'
 import { SocketAdapter } from './socket/socket.adapter'
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+  // 全局 BigInt 序列化
+  if (!Reflect.get(BigInt.prototype, 'toJSON')) {
+    Reflect.set(BigInt.prototype, 'toJSON', function () {
+      return this.toString()
+    })
+  }
+
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
     logger: useWinston(),
   })
 
-  app.set('json replacer', (_: string, value: any) => {
-    if (typeof value === 'bigint') {
-      return value.toString()
-    }
-    return value
+  app.useStaticAssets({
+    root: join(__dirname, '..', 'public'),
+    decorateReply: false,
   })
-
-  app.useStaticAssets(join(__dirname, '..', 'public'))
 
   const configService = app.get<ConfigService<Env>>(ConfigService)
   const port = configService.get<number>('APP_PORT', 3000)
@@ -35,7 +38,7 @@ async function bootstrap() {
 
   await useSwagger(app)
 
-  await app.listen(port)
+  await app.listen(port, '0.0.0.0')
 
   await useServerUrl(app)
 

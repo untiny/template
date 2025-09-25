@@ -1,8 +1,9 @@
 import { Cache } from '@nestjs/cache-manager'
-import { Controller, Get, Logger, Param } from '@nestjs/common'
+import { Controller, Get, Logger, Param, Sse } from '@nestjs/common'
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
-import { ApiParam, ApiTags } from '@nestjs/swagger'
+import { ApiOperation, ApiParam, ApiProduces, ApiTags } from '@nestjs/swagger'
 import { RedisAdapter } from '@socket.io/redis-adapter'
+import { interval, map, Observable } from 'rxjs'
 import { AppService } from './app.service'
 import { SocketGateway } from './socket/socket.gateway'
 
@@ -15,6 +16,13 @@ export class AppController {
     private readonly eventEmitter: EventEmitter2,
     private readonly cache: Cache,
   ) {}
+
+  @Sse('sse')
+  @ApiOperation({ summary: 'SSE 事件流' })
+  @ApiProduces('text/event-stream')
+  sse(): Observable<any> {
+    return interval(1000).pipe(map((_) => ({ data: { hello: 'world' } })))
+  }
 
   @Get()
   async getHello() {
