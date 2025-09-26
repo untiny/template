@@ -28,11 +28,18 @@ onMounted(() => {
     </ion-header>
     <ion-content fullscreen style="--background: url('/bg.png'), url('/bg-color.png') center center/cover repeat;">
       <!--  -->
-      <DotLottieVue
-        v-for="i in 45"
-        :key="i"
-        class="w-32 h-32" autoplay loop :src="`/qlottie/1/${i}/${i}.json`"
-      />
+      <ion-grid v-for="i in 6" :key="i" :fixed="true">
+        <ion-row>
+          <ion-col v-for="j in (i === 1 ? 45 : 10)" :key="j">
+            <DotLottieVue
+              class="w-32 h-32" autoplay loop :src="`/qlottie/${i}/${j}/${j}.json`"
+            />
+            <div class="bg-white">
+              {{ i }}/{{ j }}/{{ j }}
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
 
       <!-- <ion-list style="--ion-item-background: transparent">
         <ion-item
