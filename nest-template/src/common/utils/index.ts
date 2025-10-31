@@ -1,4 +1,5 @@
 export * from './i18n.util'
+export * from './is-dev.util'
 export * from './open-api.util'
 export * from './snowflake.util'
 export * from './swagger-metadata.util'

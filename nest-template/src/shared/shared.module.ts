@@ -1,4 +1,3 @@
-import { join } from 'node:path'
 import { createKeyv } from '@keyv/redis'
 import { CacheModule } from '@nestjs/cache-manager'
 import { Global, Module } from '@nestjs/common'
@@ -6,16 +5,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { EventEmitterModule } from '@nestjs/event-emitter'
 import ms from 'ms'
 import { ClsModule } from 'nestjs-cls'
-import {
-  AcceptLanguageResolver,
-  CookieResolver,
-  HeaderResolver,
-  I18nModule,
-  I18nYamlLoader,
-  QueryResolver,
-} from 'nestjs-i18n'
+import { I18nModule } from 'nestjs-i18n'
 import { setupCls } from 'src/common/setup-cls'
 import { Env } from 'src/generated/env'
+import { getI18nOptions } from './i18n.options'
 
 @Global()
 @Module({
@@ -35,22 +28,7 @@ import { Env } from 'src/generated/env'
       },
     }),
     ClsModule.forRoot({ global: true, interceptor: { mount: true, setup: setupCls } }),
-    I18nModule.forRoot({
-      loader: I18nYamlLoader,
-      fallbackLanguage: 'zh',
-      loaderOptions: {
-        path: join('src', 'i18n'),
-        watch: process.env.NODE_ENV !== 'production', // 生产环境关闭监听，开发环境开启
-      },
-      typesOutputPath: join('src', 'generated', 'i18n', 'index.ts'),
-      resolvers: [
-        { use: QueryResolver, options: ['lang'] },
-        { use: HeaderResolver, options: ['lang'] },
-        { use: CookieResolver, options: ['lang'] },
-        AcceptLanguageResolver,
-      ],
-      logging: true,
-    }),
+    I18nModule.forRoot(getI18nOptions()),
     EventEmitterModule.forRoot({
       // 将其设置为“true”以使用通配符
       wildcard: false,
