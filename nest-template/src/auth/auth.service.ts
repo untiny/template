@@ -4,6 +4,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService, JwtSignOptions, TokenExpiredError } from '@nestjs/jwt'
 import { isEqual } from 'lodash'
+import { StringValue } from 'ms'
 import { Env } from 'src/generated/env'
 import { UserService } from 'src/user/user.service'
 import { LoginDto, TokenResponseDto } from './dto/login.dto'
@@ -21,12 +22,12 @@ export class AuthService {
     private readonly configService: ConfigService<Env>,
   ) {
     this.accessJwt = {
-      secret: this.configService.getOrThrow<string>('JWT_ACCESS_SECRET') as string,
-      expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRES_IN', '15m'),
+      secret: this.configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
+      expiresIn: this.configService.get<StringValue>('JWT_ACCESS_EXPIRES_IN', '15m'),
     }
     this.refreshJwt = {
-      secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET') as string,
-      expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d'),
+      secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
+      expiresIn: this.configService.get<StringValue>('JWT_REFRESH_EXPIRES_IN', '7d'),
     }
   }
 
@@ -63,7 +64,9 @@ export class AuthService {
     }
 
     try {
-      const user = await this.jwtService.verifyAsync<RequestUser>(refreshToken, this.refreshJwt)
+      const user = await this.jwtService.verifyAsync<RequestUser>(refreshToken, {
+        secret: this.refreshJwt.secret,
+      })
       // 计算剩余过期时间
       const remainingTime = Math.floor((user.exp as number) - Date.now() / 1000)
       await this.cache.set(`expired_refresh_token:${refreshToken}`, true, remainingTime)
