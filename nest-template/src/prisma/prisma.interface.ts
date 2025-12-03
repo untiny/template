@@ -1,4 +1,4 @@
-import { ITXClientDenyList } from '@prisma/client/runtime/library'
+import { ITXClientDenyList } from '@prisma/client/runtime/client'
 import { Kysely } from 'kysely'
 import { DB } from 'src/generated/kysely'
 import { PrismaClient } from 'src/generated/prisma/client'

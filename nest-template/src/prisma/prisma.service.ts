@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { UnwrapTuple } from '@prisma/client/runtime/library'
+import { PrismaMariaDb } from '@prisma/adapter-mariadb'
+import { DefaultArgs, UnwrapTuple } from '@prisma/client/runtime/client'
 import { blue, green } from 'kolorist'
 import { Kysely } from 'kysely'
 import { FormatOptionsWithLanguage, format } from 'sql-formatter'
@@ -12,7 +13,15 @@ import { PrismaContextWithKysely, PrismaTransactionFnWithKysely } from './prisma
 
 @Injectable()
 export class PrismaService
-  extends PrismaClient<Prisma.PrismaClientOptions, Prisma.LogLevel>
+  extends PrismaClient<
+    {
+      log: Prisma.LogDefinition[]
+      adapter: PrismaMariaDb
+    },
+    Prisma.LogLevel,
+    Prisma.GlobalOmitConfig | undefined,
+    DefaultArgs
+  >
   implements OnModuleInit, OnModuleDestroy
 {
   public $kysely: Kysely<DB>
@@ -25,7 +34,17 @@ export class PrismaService
       { level: 'error', emit: 'event' },
     ]
 
-    super({ log })
+    const url = new URL(configService.getOrThrow<string>('DATABASE_URL'))
+
+    const adapter = new PrismaMariaDb({
+      host: url.hostname,
+      port: +url.port,
+      user: url.username,
+      password: url.password,
+      database: url.pathname.slice(1),
+    })
+
+    super({ log, adapter })
 
     const enableDebug = this.configService.get<string>('SQL_DEBUG', 'false') === 'true'
 

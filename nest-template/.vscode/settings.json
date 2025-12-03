@@ -9,10 +9,7 @@
     "source.fixAll.biome": "explicit",
     "source.organizeImports.biome": "explicit"
   },
-  "cSpell.words": [
-    "Metadatas",
-    "snowflakify"
-  ],
+  "cSpell.words": ["Metadatas", "snowflakify"],
   "[javascript]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
