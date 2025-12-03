@@ -130,10 +130,5 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
   },
-  "packageManager": "pnpm@10.12.1",
-  "pnpm": {
-    "overrides": {
-      "@prisma/client-runtime-utils": "7.0.1"
-    }
-  }
+  "packageManager": "pnpm@10.12.1"
 }
