@@ -1,17 +1,33 @@
 import { ZodRawShapeCompat } from '@modelcontextprotocol/sdk/server/zod-compat.js'
 import { SetMetadata } from '@nestjs/common'
-import { MCP_PROMPT_METADATA_KEY } from './constants'
+import { ZodObject } from 'zod'
+import { MCP_PROMPT_METADATA_KEY, MCP_SCHEMA_METADATA_KEY } from './constants'
 
-export type PromptOptions<Args extends ZodRawShapeCompat = ZodRawShapeCompat> = {
+export type PromptOptions = {
   title?: string
   description?: string
-  argsSchema?: Args
+  argsSchema?: ZodObject
 }
 
-export interface PromptMetadata<Args extends ZodRawShapeCompat = ZodRawShapeCompat> extends PromptOptions<Args> {
+export interface PromptMetadata {
   name: string
+  title?: string
+  description?: string
+  argsSchema?: ZodRawShapeCompat
 }
 
-export function Prompt<Args extends ZodRawShapeCompat = ZodRawShapeCompat>(name: string, option?: PromptOptions<Args>) {
-  return SetMetadata(MCP_PROMPT_METADATA_KEY, { name, ...option })
+export function Prompt(name: string, option?: PromptOptions): MethodDecorator {
+  const metadata: PromptMetadata = { name }
+
+  if (option?.argsSchema instanceof ZodObject) {
+    metadata.argsSchema = option?.argsSchema.shape
+  }
+
+  return (target, key, descriptor) => {
+    if (!metadata.argsSchema) {
+      const schema = Reflect.getMetadata(MCP_SCHEMA_METADATA_KEY, target, key as string) as ZodObject
+      metadata.argsSchema = schema?.shape as ZodRawShapeCompat
+    }
+    return SetMetadata(MCP_PROMPT_METADATA_KEY, metadata)(target, key, descriptor)
+  }
 }
