@@ -1,26 +1,25 @@
 <script lang="ts" setup>
-import { Capacitor, CapacitorHttp } from '@capacitor/core'
-import { useQRCode } from '@vueuse/integrations/useQRCode'
-import viteIcon from '@/assets/vite.svg'
-import vueIcon from '@/assets/vue.svg'
+  import { Capacitor, CapacitorHttp } from '@capacitor/core'
+  import { useQRCode } from '@vueuse/integrations/useQRCode'
+  import viteIcon from '@/assets/vite.svg'
+  import vueIcon from '@/assets/vue.svg'
 
-const ip = ref('123')
-const text = ref('text-to-encode')
-const qrcode = useQRCode(text, { margin: 0 })
+  const ip = ref('123')
+  const text = ref('text-to-encode')
+  const qrcode = useQRCode(text, { margin: 0 })
 
-const platform = Capacitor.getPlatform()
+  const platform = Capacitor.getPlatform()
 
-async function test() {
-  try {
-    const res = await CapacitorHttp.get({
-      url: 'http://192.168.10.170:5173/',
-    })
-    console.log('什么滴家伙', JSON.stringify(res))
+  async function test() {
+    try {
+      const res = await CapacitorHttp.get({
+        url: 'http://192.168.10.170:5173/',
+      })
+      console.log('什么滴家伙', JSON.stringify(res))
+    } catch (error) {
+      console.log('错误', JSON.stringify(error))
+    }
   }
-  catch (error) {
-    console.log('错误', JSON.stringify(error))
-  }
-}
 </script>
 
 <template>
@@ -50,21 +49,14 @@ async function test() {
               --padding-end: 1rem;
             "
           >
-            <ion-button slot="end" size="small" @click="test">
-              OK
-            </ion-button>
+            <ion-button slot="end" size="small" @click="test">OK</ion-button>
           </ion-input>
         </div>
         <div class="bg-white rounded-2xl p-4 col-span-2 row-span-2">
           <img :src="qrcode" class="w-full flex">
         </div>
-        <ion-button
-          size="large"
-          class="bg-white rounded-2xl col-span-2 row-span-1 m-0"
-          mode="ios"
-          color="tertiary"
-        >
-          <ion-icon slot="start" :icon="viteIcon" />
+        <ion-button size="large" class="bg-white rounded-2xl col-span-2 row-span-1 m-0" mode="ios" color="tertiary">
+          <ion-icon slot="start" :icon="viteIcon"/>
           <span>Untiny</span>
         </ion-button>
         <ion-button
@@ -74,43 +66,32 @@ async function test() {
           color="warning"
           disabled
         >
-          <ion-icon slot="start" :icon="vueIcon" />
+          <ion-icon slot="start" :icon="vueIcon"/>
           <span>Untiny</span>
         </ion-button>
         <div class="bg-white rounded-2xl py-4 col-span-4">
           <ion-item lines="none" mode="ios" button disabled>
             <ion-label>platform</ion-label>
-            <ion-note slot="end">
-              {{ platform }}
-            </ion-note>
+            <ion-note slot="end">{{ platform }}</ion-note>
           </ion-item>
           <ion-item lines="none" mode="ios" button>
             <ion-label>Label</ion-label>
-            <ion-note slot="end">
-              Value
-            </ion-note>
+            <ion-note slot="end">Value</ion-note>
           </ion-item>
           <ion-item lines="none" mode="ios">
             <ion-label>Label</ion-label>
-            <ion-note slot="end">
-              Value
-            </ion-note>
+            <ion-note slot="end">Value</ion-note>
           </ion-item>
         </div>
         <div class="bg-white rounded-2xl py-4 col-span-4">
           <ion-radio-group value="strawberries">
-            <ion-radio value="grapes" disabled>
-              Grapes
-            </ion-radio><br>
-            <ion-radio value="strawberries">
-              Strawberries
-            </ion-radio><br>
-            <ion-radio value="pineapple">
-              Pineapple
-            </ion-radio><br>
-            <ion-radio value="cherries">
-              Cherries
-            </ion-radio>
+            <ion-radio value="grapes" disabled>Grapes</ion-radio>
+            <br>
+            <ion-radio value="strawberries">Strawberries</ion-radio>
+            <br>
+            <ion-radio value="pineapple">Pineapple</ion-radio>
+            <br>
+            <ion-radio value="cherries">Cherries</ion-radio>
           </ion-radio-group>
         </div>
 

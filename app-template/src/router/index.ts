@@ -1,5 +1,5 @@
-import type { RouteRecordRaw } from 'vue-router'
 import { createRouter, createWebHistory } from '@ionic/vue-router'
+import type { RouteRecordRaw } from 'vue-router'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -39,7 +39,6 @@ const routes: Array<RouteRecordRaw> = [
       // },
     ],
   },
-
 ]
 
 const router = createRouter({

@@ -1,15 +1,15 @@
 <script lang="ts" setup>
-import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
-import { arrowBackOutline } from 'ionicons/icons'
+  import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
+  import { arrowBackOutline } from 'ionicons/icons'
 
-defineProps<{ channelId: string }>()
+  defineProps<{ channelId: string }>()
 
-const count = ref(0)
-onMounted(() => {
-  setInterval(() => {
-    count.value++
-  }, 1000)
-})
+  const count = ref(0)
+  onMounted(() => {
+    setInterval(() => {
+      count.value++
+    }, 1000)
+  })
 </script>
 
 <template>
@@ -19,7 +19,7 @@ onMounted(() => {
         <ion-buttons slot="start">
           <ion-menu-toggle>
             <ion-button>
-              <ion-icon slot="icon-only" :icon="arrowBackOutline" />
+              <ion-icon slot="icon-only" :icon="arrowBackOutline"/>
             </ion-button>
           </ion-menu-toggle>
         </ion-buttons>
@@ -31,12 +31,8 @@ onMounted(() => {
       <ion-grid v-for="i in 6" :key="i" :fixed="true">
         <ion-row>
           <ion-col v-for="j in (i === 1 ? 45 : 10)" :key="j">
-            <DotLottieVue
-              class="w-32 h-32" autoplay loop :src="`/qlottie/${i}/${j}/${j}.json`"
-            />
-            <div class="bg-white">
-              {{ i }}/{{ j }}/{{ j }}
-            </div>
+            <DotLottieVue class="w-32 h-32" autoplay loop :src="`/qlottie/${i}/${j}/${j}.json`"/>
+            <div class="bg-white">{{ i }}/{{ j }}/{{ j }}</div>
           </ion-col>
         </ion-row>
       </ion-grid>

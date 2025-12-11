@@ -1,12 +1,12 @@
-import type { PresetName } from 'unplugin-auto-import/types'
-import type { PluginOption } from 'vite'
 import path from 'node:path'
 import process from 'node:process'
 import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
+import type { PresetName } from 'unplugin-auto-import/types'
 import AutoImport from 'unplugin-auto-import/vite'
 import { IonicResolver } from 'unplugin-vue-components/resolvers'
 import Components from 'unplugin-vue-components/vite'
+import type { PluginOption } from 'vite'
 import { defineConfig, loadEnv } from 'vite'
 
 // https://vite.dev/config/
@@ -18,12 +18,7 @@ export default defineConfig((config) => {
     resolvers: [IonicResolver()],
   })
 
-  const autoImportPreset: PresetName[] = [
-    'vue',
-    '@vueuse/core',
-    'vue-router',
-    'pinia',
-  ]
+  const autoImportPreset: PresetName[] = ['vue', '@vueuse/core', 'vue-router', 'pinia']
 
   const autoImport = AutoImport({
     imports: [
@@ -47,12 +42,7 @@ export default defineConfig((config) => {
     dirs: ['./src/stores/**', './src/composables/**'],
   })
 
-  const plugins: PluginOption[] = [
-    vue(),
-    components,
-    autoImport,
-    tailwindcss(),
-  ]
+  const plugins: PluginOption[] = [vue(), components, autoImport, tailwindcss()]
 
   return {
     plugins,

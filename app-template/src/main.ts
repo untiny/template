@@ -24,10 +24,7 @@ async function injectSafeAreaVariables() {
   }
   const safeArea = await SafeArea.getSafeArea()
   Object.entries(safeArea).forEach(([key, value]) => {
-    document.documentElement.style.setProperty(
-      `--ion-safe-area-${key}`,
-      `${value}px`,
-    )
+    document.documentElement.style.setProperty(`--ion-safe-area-${key}`, `${value}px`)
   })
 }
 
@@ -54,12 +51,16 @@ async function bootstrap() {
     'ion-toggle',
   ]
 
-  document.addEventListener('click', (event) => {
-    const target = event.target as HTMLElement
-    if (target.closest(clickSounds.join(','))) {
-      ClickSound.play()
-    }
-  }, true)
+  document.addEventListener(
+    'click',
+    (event) => {
+      const target = event.target as HTMLElement
+      if (target.closest(clickSounds.join(','))) {
+        ClickSound.play()
+      }
+    },
+    true,
+  )
 
   app.mount('#app')
 }

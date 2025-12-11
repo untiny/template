@@ -9,9 +9,14 @@
     "ignoreUnknown": true,
     "includes": [
       "**",
-      "!dist",
-      "!src/generated",
-      "!src/i18n"
+      "!!dist",
+      "!!android",
+      "!!ios",
+      "!!harmony",
+      "!!harmonyos",
+      "!public",
+      "!auto-imports.d.ts",
+      "!components.d.ts"
     ]
   },
   "formatter": {
@@ -54,5 +59,30 @@
         "organizeImports": "on"
       }
     }
-  }
+  },
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "formatter": {
+      "enabled": true,
+      "indentScriptAndStyle": true
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.vue"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          }
+        }
+      }
+    }
+  ]
 }

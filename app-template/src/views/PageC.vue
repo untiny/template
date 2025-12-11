@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-const count = ref(0)
-onMounted(() => {
-  setInterval(() => {
-    count.value++
-  }, 1000)
-})
+  const count = ref(0)
+  onMounted(() => {
+    setInterval(() => {
+      count.value++
+    }, 1000)
+  })
 </script>
 
 <template>
@@ -12,7 +12,7 @@ onMounted(() => {
     <ion-header class="ion-no-border" translucent>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button />
+          <ion-back-button/>
         </ion-buttons>
         <ion-title>Page C</ion-title>
       </ion-toolbar>

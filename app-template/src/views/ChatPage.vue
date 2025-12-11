@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { menuController } from '@ionic/vue'
+  import { menuController } from '@ionic/vue'
 
-async function onChat(i: number) {
-  await menuController.open('chat')
-}
+  async function onChat(_i: number) {
+    await menuController.open('chat')
+  }
 
-const { width } = useWindowSize()
+  const { width } = useWindowSize()
 
-const chatMaxWidth = computed(() => width.value - 390)
+  const chatMaxWidth = computed(() => width.value - 390)
 </script>
 
 <template>
@@ -16,14 +16,16 @@ const chatMaxWidth = computed(() => width.value - 390)
       <ion-page id="main">
         <ion-header class="ion-no-border" translucent>
           <ion-toolbar>
-            <ion-searchbar mode="ios" class="!pb-0" />
+            <ion-searchbar mode="ios" class="!pb-0"/>
           </ion-toolbar>
         </ion-header>
         <ion-content color="withe" fullscreen>
           <ion-list>
             <ion-item
               v-for="i in 10"
-              :key="i" button lines="none"
+              :key="i"
+              button
+              lines="none"
               :router-link="`/chat/channel-${i}`"
               @click="onChat(i)"
             >
@@ -40,18 +42,22 @@ const chatMaxWidth = computed(() => width.value - 390)
       </ion-page>
 
       <ion-menu
-        side="end" menu-id="chat" content-id="main" style="--width: 100%;" :style="{
+        side="end"
+        menu-id="chat"
+        content-id="main"
+        style="--width: 100%;"
+        :style="{
           '--side-max-width': `${chatMaxWidth}px`,
         }"
       >
-        <ion-router-outlet />
+        <ion-router-outlet/>
       </ion-menu>
     </ion-split-pane>
   </ion-page>
 </template>
 
 <style lang="css">
-ion-content::shadow::part(background)::before {
-  content: "";
-}
+  ion-content::shadow::part(background)::before {
+    content: "";
+  }
 </style>
