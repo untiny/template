@@ -32,6 +32,8 @@
     "generate:env-type": "tsx scripts/generate-env-type.ts"
   },
   "dependencies": {
+    "@ai-sdk/google": "^2.0.46",
+    "@ai-sdk/openai": "^2.0.86",
     "@fastify/static": "^8.3.0",
     "@keyv/redis": "^4.6.0",
     "@modelcontextprotocol/sdk": "^1.24.3",
@@ -54,6 +56,7 @@
     "@scalar/nestjs-api-reference": "^0.5.14",
     "@socket.io/redis-adapter": "^8.3.0",
     "accept-language": "^3.0.20",
+    "ai": "^5.0.113",
     "bcrypt": "^6.0.0",
     "cache-manager": "^7.2.6",
     "class-transformer": "^0.5.1",
@@ -72,6 +75,7 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
+    "qwen-ai-provider-v5": "^1.0.2",
     "redis": "^5.10.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",

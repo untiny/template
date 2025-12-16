@@ -20,6 +20,7 @@ async function bootstrap() {
 
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
     logger: useWinston(),
+    cors: true,
   })
 
   app.useStaticAssets({
