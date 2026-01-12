@@ -10,9 +10,10 @@ import { PrismaModule } from './prisma/prisma.module'
 import { SharedModule } from './shared/shared.module'
 import { SocketModule } from './socket/socket.module'
 import { UserModule } from './user/user.module'
+import { AiModule } from './ai/ai.module';
 
 @Module({
-  imports: [SharedModule, PrismaModule, AuthModule, UserModule, SocketModule, McpModule],
+  imports: [SharedModule, PrismaModule, AuthModule, UserModule, SocketModule, McpModule, AiModule],
   controllers: [AppController],
   providers: [
     { provide: APP_PIPE, useClass: I18nValidationPipe },
